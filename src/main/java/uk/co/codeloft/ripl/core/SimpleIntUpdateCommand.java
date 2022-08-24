@@ -6,6 +6,7 @@ import java.util.function.BiConsumer;
 import java.util.function.BiPredicate;
 
 @Getter
+@Deprecated
 public class SimpleIntUpdateCommand<T extends AggregateRoot> extends UpdateCommand<T> {
 
     private final BiPredicate<T, Integer> preCondition;
@@ -14,12 +15,6 @@ public class SimpleIntUpdateCommand<T extends AggregateRoot> extends UpdateComma
 
     public SimpleIntUpdateCommand(T target, BiConsumer<T, Integer> func, int param) {
         this(target, null, func, param);
-        /*
-        super(target);
-        this.func = func;
-        this.param = param;
-
-         */
     }
 
     public SimpleIntUpdateCommand(T target, BiPredicate<T, Integer> preCond, BiConsumer<T, Integer> func, int param) {

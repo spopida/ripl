@@ -1,9 +1,6 @@
 package uk.co.codeloft.ripl.example;
 
-import uk.co.codeloft.ripl.core.Command;
-import uk.co.codeloft.ripl.core.Entity;
-import uk.co.codeloft.ripl.core.InMemoryRepository;
-import uk.co.codeloft.ripl.core.IntUpdateCommandTemplate;
+import uk.co.codeloft.ripl.core.*;
 import uk.co.codeloft.ripl.example.holidayhome.commands.CreateHolidayHomeCommand;
 import uk.co.codeloft.ripl.example.holidayhome.Booking;
 import uk.co.codeloft.ripl.example.holidayhome.HolidayHome;
@@ -16,11 +13,6 @@ import java.util.function.BiPredicate;
 public class ExampleIoplApplication {
 
     public static void main(String[] args) {
-
-        // Create a new InMemoryRepository for the HolidayHome aggregate
-        // TODO: Inject this somehow
-
-        InMemoryRepository<HolidayHome> repository = new InMemoryRepository<>();
 
         // Declare parent-child relationships - allow inspection reports as children of the aggregate root,
         // and allow inspection issues as children of inspection reports.
@@ -39,62 +31,80 @@ public class ExampleIoplApplication {
                 .ownerName("Catherine Sage")
                 .build();
 
-        // Make a 'create' command and tell the repository to execute the command, receiving an event
-        // by way of response.  The create command might have some pre-conditions based on the attributes
-        // that are mandatory for a holiday home
+        // Make a 'create' command
         CreateHolidayHomeCommand createCmd = new CreateHolidayHomeCommand(kernel);
 
-        // Declare pre-conditions for mutating the number of bedrooms - in this case the number of beds must be <= 10
-        BiPredicate<HolidayHome, Integer> noMoreThanTenBeds = (t, b) -> b <= 10;
+        // Make a command to update the number of bedrooms with a pre-condition and an event action
+        BiPredicate<HolidayHome, Integer> noMoreThanTenBeds = (t, b) -> b <= 10;                                // Pre-condition for mutating number of beds
+        BiConsumer<HolidayHome, Integer> changeNumberOfBeds = (h, b) -> h.getKernel().setNumberOfBedrooms(b);   // Function to change number of beds
+        UpdateCommandTemplate<HolidayHome, Integer> setNumberOfBeds = new UpdateCommandTemplate<>(noMoreThanTenBeds, changeNumberOfBeds);
 
-        // Declare functionality that can be used to change the number of bedrooms when pre-conditions are met
-        BiConsumer<HolidayHome, Integer> changeNumberOfBeds = (h, b) -> h.getKernel().setNumberOfBedrooms(b);
-
-        // Create a command template that can be used multiple times with different parameters
-        IntUpdateCommandTemplate<HolidayHome> setNumberOfBeds = new IntUpdateCommandTemplate<>(noMoreThanTenBeds, changeNumberOfBeds);
-
+        // TODO: DEEP COPY !!
         // Create a HolidayHome and do stuff with it
-        try {
-            HolidayHome h = (HolidayHome) repository.apply(createCmd);
-            System.out.print(h.toString());
+        HolidayHome h1 = doCommand(createCmd);
+        print(h1);
 
-            h = (HolidayHome) repository.apply(setNumberOfBeds.using(h, 6));
-            System.out.print(h.toString());
+        HolidayHome h2 = doCommand(setNumberOfBeds.using(h1, 6));
+        print(h2);
 
-            h = (HolidayHome) repository.apply(setNumberOfBeds.using(h, 8));
-            System.out.print(h.toString());
+        HolidayHome h3 = doCommand(setNumberOfBeds.using(h2, 8));
+        print(h3);
 
-            h = (HolidayHome) repository.apply(setNumberOfBeds.using(h, 11));
-            System.out.print(h.toString());
+        HolidayHome h4 = doCommand(setNumberOfBeds.using(h3, 11));
+        print(h4);
 
-            // Create an 'update' command that adds an inspection report to the aggregate root
-            //
-            // This command constructor will check the classes of the parent and child according to the relationship
-            // If all is OK,
-            //
-            // CreateChildCommand<HolidayHome> createReport = new CreateChildCommand<>(h, "is documented by", inspectionReportKernel);
-            // InspectionReport report = repository.apply(createReport);
-            // CreateChildCommand<HolidayHome> createIssue = new CreateChildCommand<>(report, "contains", issueKernel)
-            // InspectionIssue issue = repository.apply(createIssue);
-            //
-            // BiPredicate<InspectionReport, StatusEnum> statusNotClosed = (target, intent) -> target.getStatus() != Status.CLOSED;
-            // BiConsumer<InspectionReport, StatusEnum> changeStatus = (result, intent) -> report.setStatus(intent);
-            //
-            // ChildUpdateCommandTemplate<HolidayHome> updateReportStatus = new ChildUpdateCommandTemplate<>(
-            //      statusNotClosed,
-            //      changeStatus);
-            //
-            // h = repository.apply(
-            //      updateReportStatus.using(
-            //          report,
-            //          Status.PENDING_REVIEW));
-            //
-            // Not totally comfortable with the Repository acting as a command executor
-        } catch (Command.PreConditionException ex) {
-            System.err.println(ex.getMessage());
-            System.exit(1);
-        }
+        HolidayHome h5 = doCommand(HolidayHome.SET_OWNER.using(h1,"Catherine Thyme"));
+        print(h5);
+
+        // Create an 'update' command that adds an inspection report to the aggregate root
+        //
+        // This command constructor will check the classes of the parent and child according to the relationship
+        // If all is OK,
+        //
+        // CreateChildCommand<HolidayHome> createReport = new CreateChildCommand<>(h, "is documented by", inspectionReportKernel);
+        // InspectionReport report = repository.apply(createReport);
+        // CreateChildCommand<HolidayHome> createIssue = new CreateChildCommand<>(report, "contains", issueKernel)
+        // InspectionIssue issue = repository.apply(createIssue);
+        //
+        // BiPredicate<InspectionReport, StatusEnum> statusNotClosed = (target, intent) -> target.getStatus() != Status.CLOSED;
+        // BiConsumer<InspectionReport, StatusEnum> changeStatus = (result, intent) -> report.setStatus(intent);
+        //
+        // ChildUpdateCommandTemplate<HolidayHome> updateReportStatus = new ChildUpdateCommandTemplate<>(
+        //      statusNotClosed,
+        //      changeStatus);
+        //
+        // h = repository.apply(
+        //      updateReportStatus.using(
+        //          report,
+        //          Status.PENDING_REVIEW));
+        //
+        // Not totally comfortable with the Repository acting as a command executor
 
         System.exit(0);
+    }
+
+    // TODO: This is too fancy for a simple example
+    private static HolidayHome doCommand(Command<HolidayHome> cmd) {
+        // Create a new InMemoryRepository for the HolidayHome aggregate
+        // TODO: Inject this somehow
+
+        InMemoryRepository<HolidayHome> repository = new InMemoryRepository<>();
+
+        HolidayHome result = null;
+
+        // Initialise the result to the current command target (if there is one)
+        if (UpdateCommand.class.isAssignableFrom(cmd.getClass()))
+            result = (HolidayHome)((UpdateCommand)cmd).getTarget();
+
+        try {
+            result = (HolidayHome) repository.apply(cmd);
+        } catch (Command.PreConditionException ex) {
+            System.out.println(String.format("Command ignored because: %s%n", ex.getMessage()));
+        }
+        return result;
+    }
+
+    private static void print(HolidayHome h) {
+        if (h != null) System.out.print(h.toString());
     }
 }

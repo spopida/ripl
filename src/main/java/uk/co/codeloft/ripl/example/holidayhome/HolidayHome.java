@@ -4,6 +4,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 import uk.co.codeloft.ripl.core.AggregateRoot;
+import uk.co.codeloft.ripl.core.UpdateCommandTemplate;
 import uk.co.codeloft.ripl.example.holidayhome.events.HolidayHomeCreatedEvent;
 
 @Getter
@@ -55,6 +56,10 @@ public class HolidayHome extends AggregateRoot {
             return result.toString();
         }
     }
+
+    public static final UpdateCommandTemplate<HolidayHome, String> SET_OWNER = new UpdateCommandTemplate<>(
+            (target, owner) -> !owner.isBlank(),
+            (result, owner) -> result.getKernel().setOwnerName(owner));
 
     //-- Non-static Members --//
 

@@ -1,5 +1,6 @@
 package uk.co.codeloft.ripl.core;
 
+@Deprecated
 public class SimpleIntUpdatedEvent<T extends AggregateRoot> extends UpdatedEvent<T>{
 
     public SimpleIntUpdatedEvent(SimpleIntUpdateCommand<T> command) {

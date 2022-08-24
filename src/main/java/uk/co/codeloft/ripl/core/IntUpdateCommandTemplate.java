@@ -6,6 +6,7 @@ import java.util.function.BiConsumer;
 import java.util.function.BiPredicate;
 
 @Getter
+@Deprecated
 public class IntUpdateCommandTemplate<T extends AggregateRoot> {
     private final BiPredicate<T, Integer> preCondition;
     private final BiConsumer<T, Integer> eventFunc;
