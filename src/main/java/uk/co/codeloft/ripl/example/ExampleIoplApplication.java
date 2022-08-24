@@ -27,7 +27,7 @@ public class ExampleIoplApplication {
 
         Entity.allowCollection(HolidayHome.class, InspectionReport.class, "is documented by");
         Entity.allowCollection(HolidayHome.class, Booking.class, "is booked by");
-        Entity.allowCollection(InspectionReport.class, InspectionIssue.class, "documents");
+        Entity.allowCollection(InspectionReport.class, InspectionIssue.class, "contains");
 
         // Build a HolidayHome kernel
         HolidayHome.Kernel kernel = HolidayHome.Kernel.builder()
@@ -51,26 +51,43 @@ public class ExampleIoplApplication {
         BiConsumer<HolidayHome, Integer> changeNumberOfBeds = (h, b) -> h.getKernel().setNumberOfBedrooms(b);
 
         // Create a command template that can be used multiple times with different parameters
-        IntUpdateCommandTemplate<HolidayHome> updateNumberOfBeds = new IntUpdateCommandTemplate<>(noMoreThanTenBeds, changeNumberOfBeds);
+        IntUpdateCommandTemplate<HolidayHome> setNumberOfBeds = new IntUpdateCommandTemplate<>(noMoreThanTenBeds, changeNumberOfBeds);
 
         // Create a HolidayHome and do stuff with it
         try {
             HolidayHome h = (HolidayHome) repository.apply(createCmd);
             System.out.print(h.toString());
 
-            h = (HolidayHome) repository.apply(updateNumberOfBeds.using(h, 6));
+            h = (HolidayHome) repository.apply(setNumberOfBeds.using(h, 6));
             System.out.print(h.toString());
 
-            h = (HolidayHome) repository.apply(updateNumberOfBeds.using(h, 8));
+            h = (HolidayHome) repository.apply(setNumberOfBeds.using(h, 8));
             System.out.print(h.toString());
 
-            h = (HolidayHome) repository.apply(updateNumberOfBeds.using(h, 11));
+            h = (HolidayHome) repository.apply(setNumberOfBeds.using(h, 11));
             System.out.print(h.toString());
 
             // Create an 'update' command that adds an inspection report to the aggregate root
             //
-            // AddChildCommand addChildCmd = new AddChildCommand(h.getId(), inspectionReportKernel);
-            // h.attemptCommand(new AddChildCommand(h.getId(), "is documented by", inspectionReportKernel));
+            // This command constructor will check the classes of the parent and child according to the relationship
+            // If all is OK,
+            //
+            // CreateChildCommand<HolidayHome> createReport = new CreateChildCommand<>(h, "is documented by", inspectionReportKernel);
+            // InspectionReport report = repository.apply(createReport);
+            // CreateChildCommand<HolidayHome> createIssue = new CreateChildCommand<>(report, "contains", issueKernel)
+            // InspectionIssue issue = repository.apply(createIssue);
+            //
+            // BiPredicate<InspectionReport, StatusEnum> statusNotClosed = (target, intent) -> target.getStatus() != Status.CLOSED;
+            // BiConsumer<InspectionReport, StatusEnum> changeStatus = (result, intent) -> report.setStatus(intent);
+            //
+            // ChildUpdateCommandTemplate<HolidayHome> updateReportStatus = new ChildUpdateCommandTemplate<>(
+            //      statusNotClosed,
+            //      changeStatus);
+            //
+            // h = repository.apply(
+            //      updateReportStatus.using(
+            //          report,
+            //          Status.PENDING_REVIEW));
             //
             // Not totally comfortable with the Repository acting as a command executor
         } catch (Command.PreConditionException ex) {
