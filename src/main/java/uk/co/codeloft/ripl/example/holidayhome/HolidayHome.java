@@ -57,6 +57,7 @@ public class HolidayHome extends AggregateRoot {
         }
     }
 
+    // A command template to set the owner (including a pre-condition and an action)
     public static final UpdateCommandTemplate<HolidayHome, String> SET_OWNER = new UpdateCommandTemplate<>(
             (target, owner) -> !owner.isBlank(),
             (result, owner) -> result.getKernel().setOwnerName(owner));
@@ -78,6 +79,8 @@ public class HolidayHome extends AggregateRoot {
         this.kernel = kernel;
     }
 
+    //TODO: delegate upwards
+    //TODO: capture children (but this should prob. be done by the parent?
     public String toString() {
         StringBuilder result = new StringBuilder();
         result.append(String.format("==========%n"));

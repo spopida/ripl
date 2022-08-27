@@ -10,5 +10,10 @@ import uk.co.codeloft.ripl.core.ChildEntity;
 @Getter
 @Setter
 public class InspectionIssue extends ChildEntity<HolidayHome> {
+
+    public InspectionIssue() {
+        //TODO
+        super(null);
+    }
     private String issueDescription;
 }

@@ -6,7 +6,9 @@ import uk.co.codeloft.ripl.example.holidayhome.Booking;
 import uk.co.codeloft.ripl.example.holidayhome.HolidayHome;
 import uk.co.codeloft.ripl.example.holidayhome.InspectionIssue;
 import uk.co.codeloft.ripl.example.holidayhome.InspectionReport;
+import uk.co.codeloft.ripl.example.holidayhome.commands.CreateInspectionReportCommand;
 
+import java.time.LocalDate;
 import java.util.function.BiConsumer;
 import java.util.function.BiPredicate;
 
@@ -34,7 +36,7 @@ public class ExampleIoplApplication {
         // Make a 'create' command
         CreateHolidayHomeCommand createCmd = new CreateHolidayHomeCommand(kernel);
 
-        // Make a command to update the number of bedrooms with a pre-condition and an event action
+        // Make a command template to update the number of bedrooms with a pre-condition and an event action
         BiPredicate<HolidayHome, Integer> noMoreThanTenBeds = (t, b) -> b <= 10;                                // Pre-condition for mutating number of beds
         BiConsumer<HolidayHome, Integer> changeNumberOfBeds = (h, b) -> h.getKernel().setNumberOfBedrooms(b);   // Function to change number of beds
         UpdateCommandTemplate<HolidayHome, Integer> setNumberOfBeds = new UpdateCommandTemplate<>(noMoreThanTenBeds, changeNumberOfBeds);
@@ -53,14 +55,28 @@ public class ExampleIoplApplication {
         HolidayHome h4 = doCommand(setNumberOfBeds.using(h3, 11));
         print(h4);
 
+        // Here's an example where an UpdateCommandTemplate instance has been defined as a static variable in
+        // the aggregate root class - this offers a nicer level of encapsulation
         HolidayHome h5 = doCommand(HolidayHome.SET_OWNER.using(h1,"Catherine Thyme"));
         print(h5);
+
+        // Now create some children
+        InspectionReport.Kernel rptKernel = InspectionReport.Kernel.builder()
+                .grade(InspectionReport.InspectionGrade.EXCELLENT)
+                .inspectorName("Ivor Beadyeye")
+                .reportDate(LocalDate.now())
+                .build();
+
+        CreateInspectionReportCommand createReport = new CreateInspectionReportCommand(h5,"is documented by", rptKernel);
 
         // Create an 'update' command that adds an inspection report to the aggregate root
         //
         // This command constructor will check the classes of the parent and child according to the relationship
         // If all is OK,
         //
+        // CreateInspectionReportCommand createReport = new CreateInspectionReportCommand(h, "is documented by", inspectionReportKernel);
+        //
+
         // CreateChildCommand<HolidayHome> createReport = new CreateChildCommand<>(h, "is documented by", inspectionReportKernel);
         // InspectionReport report = repository.apply(createReport);
         // CreateChildCommand<HolidayHome> createIssue = new CreateChildCommand<>(report, "contains", issueKernel)
@@ -99,6 +115,7 @@ public class ExampleIoplApplication {
         try {
             result = (HolidayHome) repository.apply(cmd);
         } catch (Command.PreConditionException ex) {
+            //TODO: use a logger to shut lint up
             System.out.println(String.format("Command ignored because: %s%n", ex.getMessage()));
         }
         return result;
