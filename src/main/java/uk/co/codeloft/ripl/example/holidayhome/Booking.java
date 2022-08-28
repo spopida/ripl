@@ -7,7 +7,7 @@ import uk.co.codeloft.ripl.core.ChildEntity;
 import java.time.LocalDate;
 
 @Getter @Setter
-public class Booking extends ChildEntity<HolidayHome> {
+public class Booking extends ChildEntity<HolidayHome, HolidayHome> {
 
     public Booking() {
         // TODO:

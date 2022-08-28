@@ -9,7 +9,7 @@ import uk.co.codeloft.ripl.core.ChildEntity;
  */
 @Getter
 @Setter
-public class InspectionIssue extends ChildEntity<HolidayHome> {
+public class InspectionIssue extends ChildEntity<HolidayHome, HolidayHome> {
 
     public InspectionIssue() {
         //TODO

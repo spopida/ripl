@@ -16,6 +16,12 @@ public class ExampleIoplApplication {
 
     public static void main(String[] args) {
 
+        // Create a new InMemoryRepository for the HolidayHome aggregate
+        // TODO: Inject this somehow
+
+        InMemoryRepository<HolidayHome> repository = new InMemoryRepository<>();
+
+
         // Declare parent-child relationships - allow inspection reports as children of the aggregate root,
         // and allow inspection issues as children of inspection reports.
 
@@ -43,21 +49,21 @@ public class ExampleIoplApplication {
 
         // TODO: DEEP COPY !!
         // Create a HolidayHome and do stuff with it
-        HolidayHome h1 = doCommand(createCmd);
+        HolidayHome h1 = doCommand(createCmd, repository);
         print(h1);
 
-        HolidayHome h2 = doCommand(setNumberOfBeds.using(h1, 6));
+        HolidayHome h2 = doCommand(setNumberOfBeds.using(h1, 6), repository);
         print(h2);
 
-        HolidayHome h3 = doCommand(setNumberOfBeds.using(h2, 8));
+        HolidayHome h3 = doCommand(setNumberOfBeds.using(h2, 8), repository);
         print(h3);
 
-        HolidayHome h4 = doCommand(setNumberOfBeds.using(h3, 11));
+        HolidayHome h4 = doCommand(setNumberOfBeds.using(h3, 11), repository);
         print(h4);
 
         // Here's an example where an UpdateCommandTemplate instance has been defined as a static variable in
         // the aggregate root class - this offers a nicer level of encapsulation
-        HolidayHome h5 = doCommand(HolidayHome.SET_OWNER.using(h1,"Catherine Thyme"));
+        HolidayHome h5 = doCommand(HolidayHome.SET_OWNER.using(h1,"Catherine Thyme"), repository);
         print(h5);
 
         // Now create some children
@@ -67,7 +73,9 @@ public class ExampleIoplApplication {
                 .reportDate(LocalDate.now())
                 .build();
 
+        // Create a report - here we are targeting h5 as the parent
         CreateInspectionReportCommand createReport = new CreateInspectionReportCommand(h5,"is documented by", rptKernel);
+        HolidayHome h6 = doCommand(createReport, repository);
 
         // Create an 'update' command that adds an inspection report to the aggregate root
         //
@@ -100,13 +108,10 @@ public class ExampleIoplApplication {
     }
 
     // TODO: This is too fancy for a simple example
-    private static HolidayHome doCommand(Command<HolidayHome> cmd) {
-        // Create a new InMemoryRepository for the HolidayHome aggregate
-        // TODO: Inject this somehow
-
-        InMemoryRepository<HolidayHome> repository = new InMemoryRepository<>();
-
+    private static HolidayHome doCommand(Command<HolidayHome> cmd, InMemoryRepository repository) {
         HolidayHome result = null;
+
+
 
         // Initialise the result to the current command target (if there is one)
         if (UpdateCommand.class.isAssignableFrom(cmd.getClass()))

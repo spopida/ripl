@@ -8,7 +8,7 @@ import uk.co.codeloft.ripl.example.holidayhome.events.InspectionReportCreatedEve
 
 import java.time.LocalDate;
 
-public class InspectionReport extends ChildEntity<HolidayHome> {
+public class InspectionReport extends ChildEntity<HolidayHome, HolidayHome> {
 
     //-- Static Members --//
 
@@ -33,7 +33,7 @@ public class InspectionReport extends ChildEntity<HolidayHome> {
         public String toString() {
             StringBuilder result = new StringBuilder();
             result.append(String.format(
-                    "Address: %s, %s, %s%n",
+                    "Inspection Report: %s, %s, %s%n",
                     this.grade.toString(),
                     this.reportDate.toString(),
                     this.inspectorName));
@@ -46,9 +46,20 @@ public class InspectionReport extends ChildEntity<HolidayHome> {
      */
     private final InspectionReport.Kernel kernel;
 
-    public InspectionReport(InspectionReportCreatedEvent evt, Kernel kernel) {
-        super(evt);
+    /**
+     * The expiry date of the report - a derived field
+     */
+    private final LocalDate expiry;
+
+    /**
+     * Construct an InspectionReport
+     * @param event the event that reflects the construction
+     * @param kernel the kernel of the report, required to complete construction
+     */
+    public InspectionReport(InspectionReportCreatedEvent event, Kernel kernel, LocalDate expiry) {
+        super(event);
         this.kernel = kernel;
+        this.expiry = expiry;
     }
 
 }

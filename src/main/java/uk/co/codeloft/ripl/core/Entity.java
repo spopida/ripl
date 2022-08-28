@@ -25,8 +25,8 @@ public abstract class Entity {
      * Nested class used to represent a possible parent-child relationship between a parent class and a child class
      */
     private static class ParentChildRelationship {
-        private Class parentClass;
-        private Class childClass;
+        private final Class parentClass;
+        private final Class childClass;
 
         protected ParentChildRelationship(Class parent, Class child) {
             // The parent class must be Entity or a sub-type
@@ -48,7 +48,7 @@ public abstract class Entity {
      * A static map of declared parent-child relationships.  Such relationships are class-level so
      * there is no need for instance-level values
      */
-    private static Map<String, ParentChildRelationship> allowedRelationships = new HashMap<>();
+    private static final Map<String, ParentChildRelationship> allowedRelationships = new HashMap<>();
 
     /**
      * Allow a parent-child relationship between two classes, distinguished by a role.  Note the invariants defined for each parameter
@@ -90,7 +90,9 @@ public abstract class Entity {
 
         // Initialise all the allowable child collections
         Entity.allowedRelationships.forEach((s, parentChildRelationship) -> {
-            this.childCollections.put(s, new ChildCollection<>());
+            // Only create a child collection if the class of this entity is the parent (or a sub-type)
+            if (parentChildRelationship.parentClass.isAssignableFrom(this.getClass()))
+                this.childCollections.put(s, new ChildCollection<>());
         });
     }
 
