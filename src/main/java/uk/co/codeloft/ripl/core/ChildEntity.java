@@ -22,6 +22,7 @@ public class ChildEntity<R extends AggregateRoot, P extends Entity> extends Enti
         this.parent = evt.getCommand().getParent();
     }
 
+    // TODO: This probably(?) needs to move
     public AggregateRoot getRootParent() {
         // recurse up the parents until we find one that cannot be assigned to ChildEntity - that must be the root
         if (ChildEntity.class.isAssignableFrom(parent.getClass()))

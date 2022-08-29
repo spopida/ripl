@@ -14,15 +14,25 @@ public abstract class Entity {
      * Represents an occurrence of an attempt to register an invalid relationship type.  If this happens
      * There is little the client can do; a coding fix is needed, hence this is a RuntimeException
      */
-    private static class InvalidRelationshipException extends RuntimeException {
+    private static class InvalidRelationshipTypeException extends RuntimeException {
 
-        protected InvalidRelationshipException(String message) {
+        protected InvalidRelationshipTypeException(String message) {
             super(message);
         }
     }
 
     /**
-     * Nested class used to represent a possible parent-child relationship between a parent class and a child class
+     * Represents an occurrence of an attempt to register an invalid relationship instance.
+     */
+    public static class InvalidRelationshipInstanceException extends Exception {
+
+        protected InvalidRelationshipInstanceException(String message) {
+            super(message);
+        }
+    }
+
+    /**
+     * Nested class used to represent a parent-child relationship between a parent class and a child class
      */
     private static class ParentChildRelationship {
         private final Class parentClass;
@@ -31,12 +41,12 @@ public abstract class Entity {
         protected ParentChildRelationship(Class parent, Class child) {
             // The parent class must be Entity or a sub-type
             if (!Entity.class.isAssignableFrom(parent)) {
-                throw new InvalidRelationshipException(Entity.class.getName() + " must be assignable from " + parent.getName());
+                throw new InvalidRelationshipTypeException(Entity.class.getName() + " must be assignable from " + parent.getName());
             }
 
             // The child class must be ChildEntity or a sub-type
             if (!ChildEntity.class.isAssignableFrom(child)) {
-                throw new InvalidRelationshipException(ChildEntity.class.getName() + " must be assignable from " + child.getName());
+                throw new InvalidRelationshipTypeException(ChildEntity.class.getName() + " must be assignable from " + child.getName());
             }
 
             this.parentClass = parent;
@@ -60,7 +70,7 @@ public abstract class Entity {
      *             other kinds of relationships with cars, but not as the owner.  For example, they could be an insured driver (without
      *             necessarily being the owner).
      */
-    public static void allowCollection(Class parentClass, Class childClass, String role) {
+    public static void allowRelationship(Class parentClass, Class childClass, String role) {
 
         // TODO: throw an exception if role already exists for the parent class
 
@@ -108,4 +118,28 @@ public abstract class Entity {
         ChildCollection<ChildEntity> children = childCollections.get(role);
         return children.asList();
     }
+
+    public void addChild(String role, ChildEntity child) throws InvalidRelationshipInstanceException {
+        Class parentClass = this.getClass();
+        Class childClass = child.getClass();
+
+        ParentChildRelationship rel = new ParentChildRelationship(this.getClass(), child.getClass());
+
+        ParentChildRelationship found = allowedRelationships.get(role);
+        if (found == null) {
+            throw new InvalidRelationshipInstanceException(String.format("Class %s cannot be a child of %s%n", childClass.getName(), parentClass.getName()));
+        }
+
+        ChildCollection<ChildEntity> children = childCollections.get(role);
+        children.add(child);
+    }
+
+    public AggregateRoot getRoot() {
+        // recurse up the parents until we find one that cannot be assigned to ChildEntity - that must be the root
+        if (this.getClass().isAssignableFrom(ChildEntity.class))
+            return ((ChildEntity<?, ?>)this).getRoot();
+        else
+            return (AggregateRoot)this;
+    }
+
 }

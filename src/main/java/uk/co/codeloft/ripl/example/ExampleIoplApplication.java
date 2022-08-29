@@ -25,9 +25,9 @@ public class ExampleIoplApplication {
         // Declare parent-child relationships - allow inspection reports as children of the aggregate root,
         // and allow inspection issues as children of inspection reports.
 
-        Entity.allowCollection(HolidayHome.class, InspectionReport.class, "is documented by");
-        Entity.allowCollection(HolidayHome.class, Booking.class, "is booked by");
-        Entity.allowCollection(InspectionReport.class, InspectionIssue.class, "contains");
+        Entity.allowRelationship(HolidayHome.class, InspectionReport.class, "is documented by");
+        Entity.allowRelationship(HolidayHome.class, Booking.class, "is booked by");
+        Entity.allowRelationship(InspectionReport.class, InspectionIssue.class, "contains");
 
         // Build a HolidayHome kernel
         HolidayHome.Kernel kernel = HolidayHome.Kernel.builder()
@@ -73,20 +73,12 @@ public class ExampleIoplApplication {
                 .reportDate(LocalDate.now())
                 .build();
 
-        // Create a report - here we are targeting h5 as the parent
+        // Create a report - here we are targeting h5 as the parent and the ultimate root here
         CreateInspectionReportCommand createReport = new CreateInspectionReportCommand(h5,"is documented by", rptKernel);
         HolidayHome h6 = doCommand(createReport, repository);
 
-        // Create an 'update' command that adds an inspection report to the aggregate root
+        // Enhance toString() functionality so that entire aggregates can be printed
         //
-        // This command constructor will check the classes of the parent and child according to the relationship
-        // If all is OK,
-        //
-        // CreateInspectionReportCommand createReport = new CreateInspectionReportCommand(h, "is documented by", inspectionReportKernel);
-        //
-
-        // CreateChildCommand<HolidayHome> createReport = new CreateChildCommand<>(h, "is documented by", inspectionReportKernel);
-        // InspectionReport report = repository.apply(createReport);
         // CreateChildCommand<HolidayHome> createIssue = new CreateChildCommand<>(report, "contains", issueKernel)
         // InspectionIssue issue = repository.apply(createIssue);
         //
@@ -103,6 +95,10 @@ public class ExampleIoplApplication {
         //          Status.PENDING_REVIEW));
         //
         // Not totally comfortable with the Repository acting as a command executor
+        //
+        // Then - really need to
+        // - Stop using raw types
+        // - Write unit tests
 
         System.exit(0);
     }

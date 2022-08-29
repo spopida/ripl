@@ -9,15 +9,20 @@ import uk.co.codeloft.ripl.example.holidayhome.events.InspectionReportCreatedEve
 
 public class CreateInspectionReportCommand extends CreateChildCommand<HolidayHome, HolidayHome, InspectionReport> {
 
-    private InspectionReport.Kernel kernel;
+    private final InspectionReport.Kernel kernel;
 
     public CreateInspectionReportCommand(HolidayHome parent, String role, InspectionReport.Kernel kernel) {
-        super(parent, role);
+        this(parent, parent, role, kernel);
+    }
+
+    public CreateInspectionReportCommand(HolidayHome root, HolidayHome parent, String role, InspectionReport.Kernel kernel) {
+        super(root, parent, role, InspectionReport.class);
         this.kernel = kernel;
     }
 
+
     @Override
     public InspectionReportCreatedEvent getEvent() {
-        return new InspectionReportCreatedEvent(this, this.kernel);
+        return new InspectionReportCreatedEvent(this, this.kernel, this.getRoot(), this.getRole(), this.getParent());
     }
 }

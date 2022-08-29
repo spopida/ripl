@@ -28,5 +28,4 @@ public class AggregateRoot extends Entity {
         this.version = 1;
         this.createdEvent = evt;
     }
-
 }
