@@ -1,5 +1,7 @@
 package uk.co.codeloft.ripl.core;
 
+import lombok.Getter;
+
 import java.util.UUID;
 
 /**
@@ -9,6 +11,7 @@ import java.util.UUID;
  *
  * @param <P> the class of the immediate parent (which itself must sub-class Entity)
  */
+@Getter
 public class ChildEntity<R extends AggregateRoot, P extends Entity> extends Entity {
 
     // We can't be explicit about the type of the child here
@@ -20,14 +23,5 @@ public class ChildEntity<R extends AggregateRoot, P extends Entity> extends Enti
         super(UUID.randomUUID().toString());
         this.createdEvent = evt;
         this.parent = evt.getCommand().getParent();
-    }
-
-    // TODO: This probably(?) needs to move
-    public AggregateRoot getRootParent() {
-        // recurse up the parents until we find one that cannot be assigned to ChildEntity - that must be the root
-        if (ChildEntity.class.isAssignableFrom(parent.getClass()))
-            return ((ChildEntity<?, ?>)parent).getRootParent();
-        else
-            return (AggregateRoot)parent;
     }
 }

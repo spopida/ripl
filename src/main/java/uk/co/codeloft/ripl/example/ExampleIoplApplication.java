@@ -67,15 +67,27 @@ public class ExampleIoplApplication {
         print(h5);
 
         // Now create some children
-        InspectionReport.Kernel rptKernel = InspectionReport.Kernel.builder()
+        InspectionReport.Kernel firstReport = InspectionReport.Kernel.builder()
                 .grade(InspectionReport.InspectionGrade.EXCELLENT)
                 .inspectorName("Ivor Beadyeye")
                 .reportDate(LocalDate.now())
                 .build();
 
         // Create a report - here we are targeting h5 as the parent and the ultimate root here
-        CreateInspectionReportCommand createReport = new CreateInspectionReportCommand(h5,"is documented by", rptKernel);
-        HolidayHome h6 = doCommand(createReport, repository);
+        CreateInspectionReportCommand createReport1 = new CreateInspectionReportCommand(h5,"is documented by", firstReport);
+        HolidayHome h6 = doCommand(createReport1, repository);
+
+        InspectionReport.Kernel secondReport = InspectionReport.Kernel.builder()
+                .grade(InspectionReport.InspectionGrade.PERFECT)
+                .inspectorName("Belinda Overlook")
+                .reportDate(LocalDate.now().plusDays(60))
+                .build();
+
+        // Create a report - here we are targeting h5 as the parent and the ultimate root here
+        CreateInspectionReportCommand createReport2 = new CreateInspectionReportCommand(h5,"is documented by", secondReport);
+        HolidayHome h7 = doCommand(createReport2, repository);
+
+        print(h7);
 
         // Enhance toString() functionality so that entire aggregates can be printed
         //
@@ -106,8 +118,6 @@ public class ExampleIoplApplication {
     // TODO: This is too fancy for a simple example
     private static HolidayHome doCommand(Command<HolidayHome> cmd, InMemoryRepository repository) {
         HolidayHome result = null;
-
-
 
         // Initialise the result to the current command target (if there is one)
         if (UpdateCommand.class.isAssignableFrom(cmd.getClass()))

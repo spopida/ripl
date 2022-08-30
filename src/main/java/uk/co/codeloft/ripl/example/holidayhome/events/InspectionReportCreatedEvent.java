@@ -33,6 +33,7 @@ public class InspectionReportCreatedEvent extends ChildCreatedEvent<HolidayHome,
         // Get the aggregate root (not the immediate parent) targeted by the command
 
         // Clone it (Deep Copy)
+        this.parent.getRoot().evolve();
 
         // Create a new InspectionReport from the kernel
         InspectionReport rpt = new InspectionReport(this, this.kernel, null);

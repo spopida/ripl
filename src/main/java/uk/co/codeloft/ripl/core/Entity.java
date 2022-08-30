@@ -142,4 +142,27 @@ public abstract class Entity {
             return (AggregateRoot)this;
     }
 
+    public String toString() {
+        return String.format("Entity Id: %s%n", this.getId());
+    }
+
+    public String allChildren() {
+        StringBuilder sb = new StringBuilder();
+
+        // Iterate through each child collection, stringifying the children in each one
+        this.childCollections.forEach((role, collection) -> {
+            List<ChildEntity> list = collection.asList();
+            if (!list.isEmpty()) {
+                sb.append(String.format(">>>>%n"));
+                sb.append(String.format("** Role: %s **%n", role));
+                list.forEach(child -> {
+                    sb.append(String.format("----------%n"));
+                    sb.append(child.toString());
+                });
+            }
+        });
+
+        return sb.toString();
+    }
+
 }

@@ -28,4 +28,18 @@ public class AggregateRoot extends Entity {
         this.version = 1;
         this.createdEvent = evt;
     }
+
+    public String toString() {
+        return super.toString() + this.asString();
+    }
+
+    private String asString() {
+        return
+                String.format("Version: %d%n", this.getVersion()) +
+                String.format("From Snapshot: %s%n", this.getSnapshotId());
+    }
+
+    public void evolve() {
+        this.setVersion(this.version + 1);
+    }
 }

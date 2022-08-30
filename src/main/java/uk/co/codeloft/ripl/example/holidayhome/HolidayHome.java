@@ -79,17 +79,15 @@ public class HolidayHome extends AggregateRoot {
         this.kernel = kernel;
     }
 
-    //TODO: delegate upwards
-    //TODO: capture children (but this should prob. be done by the parent?
+    private String asString() {
+        return this.getKernel().toString();
+    }
+
     public String toString() {
-        StringBuilder result = new StringBuilder();
-        result.append(String.format("==========%n"));
-        result.append(String.format("Id: %s%n", this.getId()));
-        result.append(String.format("Version: %d%n", this.getVersion()));
-        result.append(String.format("From Snapshot: %s%n", this.getSnapshotId()));
-        result.append(String.format("..........%n"));
-        result.append(this.getKernel().toString());
-        result.append(String.format("==========%n"));
-        return result.toString();
+        return
+                String.format("%n-.-.-.-.-.-.-.-.-.-.-.%n") +
+                super.toString() +
+                this.getKernel().toString() +
+                this.allChildren();
     }
 }

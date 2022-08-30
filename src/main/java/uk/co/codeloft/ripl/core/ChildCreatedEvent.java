@@ -10,4 +10,5 @@ public abstract class ChildCreatedEvent<R extends AggregateRoot, P extends Entit
     public CreateChildCommand<R, P, C> getCommand() {
         return (CreateChildCommand<R, P, C> ) super.getCommand();
     }
+
 }

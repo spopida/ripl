@@ -62,4 +62,11 @@ public class InspectionReport extends ChildEntity<HolidayHome, HolidayHome> {
         this.expiry = expiry;
     }
 
+    private String asString() {
+        return String.format("Expiry: %s%n", this.expiry == null ? "null" : this.expiry.toString());
+    }
+
+    public String toString() {
+        return super.toString() + this.kernel.toString() + this.asString();
+    }
 }

@@ -70,11 +70,15 @@ public class InMemoryRepository<T extends AggregateRoot> {
         Event<T> evt = command.getEvent();
         events.put(evt.getId(), evt);
 
+        // TODO: Change here... we need to get the latest version of the AggregateRoot then pass it
+        // as a parameter to the event - but only if we insist on returning an AggregateRoot
+
         // Apply the event, returning the new version of the AggregateRoot
         AggregateRoot root = evt.apply();
 
         // If we are dealing with a CreateCommand then make a snapshot and keep track of it
         if (command.getClass().isAssignableFrom(CreateCommand.class)) {
+            // TODO: this only works by fluke for CreateChildCommands
             this.snapshots.put(root.getSnapshotId(), root);
             this.latestSnapshotsKeyedByAggregateRootId.put(root.getId(), root.getSnapshotId());
         }
