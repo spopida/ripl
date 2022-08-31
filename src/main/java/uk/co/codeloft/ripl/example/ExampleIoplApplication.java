@@ -11,10 +11,20 @@ import uk.co.codeloft.ripl.example.holidayhome.commands.CreateInspectionReportCo
 import java.time.LocalDate;
 import java.util.function.BiConsumer;
 import java.util.function.BiPredicate;
+import java.util.logging.ConsoleHandler;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class ExampleIoplApplication {
 
+    private static final Logger LOGGER;
+
+    static {
+        LOGGER = Logger.getLogger(ExampleIoplApplication.class.getName());
+        LOGGER.addHandler(new ConsoleHandler());
+    }
     public static void main(String[] args) {
+
 
         // Create a new InMemoryRepository for the HolidayHome aggregate
         // TODO: Inject this somehow
@@ -89,7 +99,7 @@ public class ExampleIoplApplication {
 
         print(h7);
 
-        // Enhance toString() functionality so that entire aggregates can be printed
+        // CHANGE EVENT / REPO FUNCTIONALITY - EVENT APPLY() SHOULD TAKE TARGET PARAM FUNCTIONALITY;
         //
         // CreateChildCommand<HolidayHome> createIssue = new CreateChildCommand<>(report, "contains", issueKernel)
         // InspectionIssue issue = repository.apply(createIssue);
@@ -126,13 +136,10 @@ public class ExampleIoplApplication {
         try {
             result = (HolidayHome) repository.apply(cmd);
         } catch (Command.PreConditionException ex) {
-            //TODO: use a logger to shut lint up
             System.out.println(String.format("Command ignored because: %s%n", ex.getMessage()));
         }
         return result;
     }
 
-    private static void print(HolidayHome h) {
-        if (h != null) System.out.print(h.toString());
-    }
+    private static void print(HolidayHome h) { if (h != null) System.out.println(h.toString()); }
 }

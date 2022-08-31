@@ -8,7 +8,7 @@ import uk.co.codeloft.ripl.example.holidayhome.events.InspectionReportCreatedEve
 
 import java.time.LocalDate;
 
-public class InspectionReport extends ChildEntity<HolidayHome, HolidayHome> {
+public class InspectionReport extends ChildEntity {
 
     //-- Static Members --//
 

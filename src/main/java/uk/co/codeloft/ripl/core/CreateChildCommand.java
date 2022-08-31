@@ -9,7 +9,7 @@ import lombok.Getter;
  * @param <C> the type of the child entity
  */
 @Getter
-public abstract class CreateChildCommand<R extends AggregateRoot, P extends Entity, C extends ChildEntity<R, P>> extends CreateCommand<R> {
+public abstract class CreateChildCommand<R extends AggregateRoot, P extends Entity, C extends ChildEntity> extends CreateCommand<R> {
 
     private final R root;
     private final P parent;

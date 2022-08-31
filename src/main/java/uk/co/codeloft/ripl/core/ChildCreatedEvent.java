@@ -1,6 +1,6 @@
 package uk.co.codeloft.ripl.core;
 
-public abstract class ChildCreatedEvent<R extends AggregateRoot, P extends Entity, C extends ChildEntity<R, P>> extends CreatedEvent<R> {
+public abstract class ChildCreatedEvent<R extends AggregateRoot, P extends Entity, C extends ChildEntity> extends CreatedEvent<R> {
 
     public ChildCreatedEvent(CreateChildCommand<R, P, C> command) {
         super(command);

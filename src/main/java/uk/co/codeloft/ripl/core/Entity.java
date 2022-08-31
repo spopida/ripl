@@ -137,7 +137,7 @@ public abstract class Entity {
     public AggregateRoot getRoot() {
         // recurse up the parents until we find one that cannot be assigned to ChildEntity - that must be the root
         if (this.getClass().isAssignableFrom(ChildEntity.class))
-            return ((ChildEntity<?, ?>)this).getRoot();
+            return this.getRoot();
         else
             return (AggregateRoot)this;
     }
