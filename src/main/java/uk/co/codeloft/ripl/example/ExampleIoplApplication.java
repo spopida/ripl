@@ -100,6 +100,10 @@ public class ExampleIoplApplication {
         print(h7);
 
         // CHANGE EVENT / REPO FUNCTIONALITY - EVENT APPLY() SHOULD TAKE TARGET PARAM FUNCTIONALITY;
+        // GET RID OF ALL TODOs
+        // SOLVE DEEP COPY QUESTION
+        // ELIMINATE THE NEED FOR BESPOKE CREATE COMMANDS (use template pattern as for updates)
+        // SUPPORT CHILD UPDATES
         //
         // CreateChildCommand<HolidayHome> createIssue = new CreateChildCommand<>(report, "contains", issueKernel)
         // InspectionIssue issue = repository.apply(createIssue);
