@@ -2,6 +2,9 @@ package uk.co.codeloft.ripl.core;
 
 import lombok.Getter;
 
+import java.util.function.BiFunction;
+import java.util.function.Predicate;
+
 /**
  * A command to create a child entity
  * @param <R> The type of the aggregate root at the top of the entity tree
@@ -9,21 +12,42 @@ import lombok.Getter;
  * @param <C> the type of the child entity
  */
 @Getter
-public abstract class CreateChildCommand<R extends AggregateRoot, P extends Entity, C extends ChildEntity> extends CreateCommand<R> {
+public class CreateChildCommand<R extends AggregateRoot, P extends Entity, C extends ChildEntity, K> extends Command<R> {
 
-    private final R root;
     private final P parent;
     private final String role;
-    private final Class<C> childClass;
+    private final K kernel;
+    BiFunction<ChildCreatedEvent<R, P, C, K>, K, C> constructor;
+    Predicate<K> preCondition;
 
-    public CreateChildCommand(R root, P parent, String role, Class<C> childClass) {
+
+    // NOTE - we don't need to pass in the AggregateRoot as target because it should be derivable from the P parent
+    public CreateChildCommand(Predicate<K> preCondition, K kernel, P parent, String role, BiFunction<ChildCreatedEvent<R, P, C, K>, K, C> ctor) {
         super();
-        this.root = root;
         this.parent = parent;
         this.role = role;
-        this.childClass = childClass;
-
-        //TODO: Check that type C is allowed to be a child of type P according to the given role - if not throw an exception; this might have
-        // to be delegated to the repository unless we move relationships into the entities!
+        this.kernel = kernel;
+        this.constructor = ctor;
+        this.preCondition = preCondition;
     }
+
+    @Override
+    public void checkPreConditions() throws PreConditionException {
+        // TODO: CHeck that C and P are related by the role! If not, throw an exception
+
+        super.checkPreConditions();
+
+        if (!preCondition.test(kernel)) throw new PreConditionException("Child pre-condition failed");
+    }
+
+    @Override
+    public ChildCreatedEvent<R, P, C, K> getEvent() {
+        return new ChildCreatedEvent<>(
+                this,
+                this.parent,
+                this.role,
+                this.kernel,
+                this.constructor);
+    }
+
 }

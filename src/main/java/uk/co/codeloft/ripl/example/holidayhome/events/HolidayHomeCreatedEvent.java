@@ -16,7 +16,8 @@ public class HolidayHomeCreatedEvent extends CreatedEvent<HolidayHome> {
     }
 
     @Override
-    public HolidayHome apply() {
-        return new HolidayHome(this, this.kernel);
+    public HolidayHome apply(HolidayHome h) {
+        return h;
+        //return new HolidayHome(this, this.kernel);
     }
 }

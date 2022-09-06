@@ -25,6 +25,6 @@ public abstract class Event<T extends AggregateRoot> {
         this.command = command;
     }
 
-    public abstract AggregateRoot apply();
+    public abstract T apply(T rootEntity);
 
 }

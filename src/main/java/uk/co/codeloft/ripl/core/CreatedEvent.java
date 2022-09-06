@@ -1,11 +1,35 @@
 package uk.co.codeloft.ripl.core;
 
-public abstract class CreatedEvent<T extends AggregateRoot> extends Event<T> {
+import java.util.function.BiFunction;
+import java.util.function.Function;
 
-    public CreatedEvent(CreateCommand<T> createCmd) {
-        // A CreatedEvent does not relate to an existing aggregate instance, therefore it must
-        // generate an id and version before calling the superclass constructor
+public class CreatedEvent<T extends AggregateRoot, K> extends Event<T> {
+
+    /**
+     * A constructor for type T. The constructor is a function that
+     * accepts this event, a kernel object, and returns an object of type T
+     */
+    private BiFunction<CreatedEvent<T, K>, K, T> constructor;
+
+    private K kernel;
+
+    /**
+     * Construct an instance of this event type
+     * @param createCmd the command that led to the creation of this event
+     * @param ctor the constructor needed to create the first version of the AggregateRoot
+     */
+    public CreatedEvent(CreateCommand<T, K> createCmd, BiFunction<CreatedEvent<T, K>, K, T> ctor) {
         super(createCmd);
+        this.kernel = createCmd.getKernel();
+        this.constructor = ctor;
+    }
+
+    /**
+     * TODO: Slight concern that this has to be called with null (since there is no target for creation)
+     */
+    @Override
+    public T apply(T target) {
+        return constructor.apply(this, this.kernel);
     }
 
 }

@@ -17,7 +17,7 @@ public abstract class Command<T extends AggregateRoot> {
         }
     }
 
-    private String id;
+    private final String id;
 
     protected Command() {
         this.id = UUID.randomUUID().toString();

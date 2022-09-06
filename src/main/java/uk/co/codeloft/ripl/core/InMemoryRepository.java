@@ -59,32 +59,33 @@ public class InMemoryRepository<T extends AggregateRoot> {
         return root;
     }
 
-    public AggregateRoot apply(Command<T> command) throws Command.PreConditionException {
+    /**
+     * Capture a command, evaluate its pre-conditions, and if successful, create a corresponding event
+     * @param command the command to evaluate
+     * @throws Command.PreConditionException
+     */
+    public void apply(Command<T> command) throws Command.PreConditionException {
         // Store the command as something that was instructed, whether it works or not
         this.commands.put(command.getId(), command);
 
         // Check the pre-conditions on the command
         command.checkPreConditions();
 
+        // Create commands have a special side effect of creating a snapshot if they are successful
+        // This is then passed into the event, which has no effect when applied!
+
+        // To do that we'll need a function that creates the object ...
+
         // Record the event
         Event<T> evt = command.getEvent();
         events.put(evt.getId(), evt);
 
-        // TODO: Change here... we need to get the latest version of the AggregateRoot then pass it
-        // as a parameter to the event - but only if we insist on returning an AggregateRoot
-
-        // Apply the event, returning the new version of the AggregateRoot
-        AggregateRoot root = evt.apply();
-
-        // If we are dealing with a CreateCommand then make a snapshot and keep track of it
-        if (command.getClass().isAssignableFrom(CreateCommand.class)) {
-            // TODO: this only works by fluke for CreateChildCommands
-            this.snapshots.put(root.getSnapshotId(), root);
-            this.latestSnapshotsKeyedByAggregateRootId.put(root.getId(), root.getSnapshotId());
-        }
-        return root;
+        return;
     }
 
+    public AggregateRoot getLatest() {
+
+    }
 
     public AggregateRoot updateAggregate(Command<T> command) throws Command.PreConditionException {
         // Store the command as something that was instructed, whether it works or not

@@ -4,6 +4,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 import uk.co.codeloft.ripl.core.AggregateRoot;
+import uk.co.codeloft.ripl.core.CreatedEvent;
 import uk.co.codeloft.ripl.core.UpdateCommandTemplate;
 import uk.co.codeloft.ripl.example.holidayhome.events.HolidayHomeCreatedEvent;
 
@@ -59,7 +60,8 @@ public class HolidayHome extends AggregateRoot {
 
     // A command template to set the owner (including a pre-condition and an action)
     public static final UpdateCommandTemplate<HolidayHome, String> SET_OWNER = new UpdateCommandTemplate<>(
-            (target, owner) -> !owner.isBlank(),
+            HolidayHome::checkOwner,
+            //(target, owner) -> !owner.isBlank(),
             (result, owner) -> result.getKernel().setOwnerName(owner));
 
     //-- Non-static Members --//
@@ -74,7 +76,7 @@ public class HolidayHome extends AggregateRoot {
      * @param evt the event resulting from successful execution of the create command
      * @param kernel the kernel of the aggregate root entity (core attributes)
      */
-    public HolidayHome(HolidayHomeCreatedEvent evt, Kernel kernel) {
+    public HolidayHome(CreatedEvent<HolidayHome, HolidayHome.Kernel> evt, Kernel kernel) {
         super(evt);
         this.kernel = kernel;
     }
@@ -89,5 +91,10 @@ public class HolidayHome extends AggregateRoot {
                 super.toString() +
                 this.getKernel().toString() +
                 this.allChildren();
+    }
+
+    //-- Pre-condition predicates --//
+    public static boolean checkOwner(HolidayHome current, String newOwner) {
+        return !newOwner.isBlank();
     }
 }

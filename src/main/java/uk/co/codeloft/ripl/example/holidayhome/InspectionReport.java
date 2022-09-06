@@ -3,6 +3,7 @@ package uk.co.codeloft.ripl.example.holidayhome;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
+import uk.co.codeloft.ripl.core.ChildCreatedEvent;
 import uk.co.codeloft.ripl.core.ChildEntity;
 import uk.co.codeloft.ripl.example.holidayhome.events.InspectionReportCreatedEvent;
 
@@ -53,13 +54,11 @@ public class InspectionReport extends ChildEntity {
 
     /**
      * Construct an InspectionReport
-     * @param event the event that reflects the construction
-     * @param kernel the kernel of the report, required to complete construction
      */
-    public InspectionReport(InspectionReportCreatedEvent event, Kernel kernel, LocalDate expiry) {
+    public InspectionReport(ChildCreatedEvent<HolidayHome, HolidayHome, InspectionReport, InspectionReport.Kernel> event, Kernel kernel) {
         super(event);
         this.kernel = kernel;
-        this.expiry = expiry;
+        this.expiry = LocalDate.now().plusDays(120);
     }
 
     private String asString() {
