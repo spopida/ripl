@@ -31,16 +31,16 @@ public class ChildCreatedEvent<R extends AggregateRoot, P extends Entity, C exte
     @Override
     public R apply(R target) {
         // Get the root of the parent (type = R)
-        R root = this.parent.getRoot();
+        R root = (R) this.parent.getRoot();
 
-        // Create a new report (type = C) with a kernel (type =K)
+        // Create a new child (type = C) with a kernel (type = K)
         C newChild = this.constructor.apply(this, kernel);
 
-
-        // Add the report to the immediate parent (type = P)
+        // Add the child to the immediate parent (type = P)
+        this.parent.addChild(this.role, newChild);
 
         // Return the aggregate root
-
+        return root;
     }
 
 }

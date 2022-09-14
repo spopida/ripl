@@ -78,6 +78,11 @@ public abstract class Entity {
         Entity.allowedRelationships.put(role, rel);
     }
 
+    public static boolean isAllowedRelationship(Class expectedParentClass, Class expectedChildClass, String role) {
+        ParentChildRelationship rel = Entity.allowedRelationships.get(role);
+
+        return (rel != null) ? rel.childClass == expectedChildClass && rel.parentClass == expectedParentClass : false;
+    }
     //-- Non-static members --//
 
     /**
@@ -119,15 +124,15 @@ public abstract class Entity {
         return children.asList();
     }
 
-    public void addChild(String role, ChildEntity child) throws InvalidRelationshipInstanceException {
-        Class parentClass = this.getClass();
-        Class childClass = child.getClass();
+    public void addChild(String role, ChildEntity child) {
+        Class<?> parentClass = this.getClass();
+        Class<?> childClass = child.getClass();
 
         ParentChildRelationship rel = new ParentChildRelationship(this.getClass(), child.getClass());
 
         ParentChildRelationship found = allowedRelationships.get(role);
         if (found == null) {
-            throw new InvalidRelationshipInstanceException(String.format("Class %s cannot be a child of %s%n", childClass.getName(), parentClass.getName()));
+            throw new InvalidRelationshipTypeException(String.format("Class %s cannot be a child of %s%n", childClass.getName(), parentClass.getName()));
         }
 
         ChildCollection<ChildEntity> children = childCollections.get(role);

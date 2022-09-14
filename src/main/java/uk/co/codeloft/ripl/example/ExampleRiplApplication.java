@@ -5,7 +5,6 @@ import uk.co.codeloft.ripl.example.holidayhome.Booking;
 import uk.co.codeloft.ripl.example.holidayhome.HolidayHome;
 import uk.co.codeloft.ripl.example.holidayhome.InspectionIssue;
 import uk.co.codeloft.ripl.example.holidayhome.InspectionReport;
-import uk.co.codeloft.ripl.example.holidayhome.commands.CreateInspectionReportCommand;
 
 import java.time.LocalDate;
 import java.util.function.BiConsumer;
@@ -78,6 +77,12 @@ public class ExampleRiplApplication {
             rosebudCottage = manager.perform(HolidayHome.SET_OWNER.using(rosebudCottage,"Catherine Thyme"));
             print(rosebudCottage);
 
+            // Now we create a child command template.  This is parameterized with 4 types:
+            // - The type of the aggregate root
+            // - The type of the parent
+            // - The type of child that is being created
+            // - The type of the kernel for the child
+            // And the constructor for the template takes a predicate on the kernel, and a constructor
             CreateChildCommandTemplate<HolidayHome, HolidayHome, InspectionReport, InspectionReport.Kernel> createRpt =
                     new CreateChildCommandTemplate<>(
                             k -> k.getReportDate().isBefore(LocalDate.now()),
@@ -87,43 +92,36 @@ public class ExampleRiplApplication {
             InspectionReport.Kernel firstReport = InspectionReport.Kernel.builder()
                     .grade(InspectionReport.InspectionGrade.EXCELLENT)
                     .inspectorName("Ivor Beadyeye")
-                    .reportDate(LocalDate.now())
+                    .reportDate(LocalDate.now().minusDays(1L))
                     .build();
 
+            // Actual creation of the child requires a command that needs the root, parent, child kernel, and relationship
+            // TODO: should the relationship be part of the template?  I think that might be better...but it's too cumbersome
+            // because we don't know the classes involved in the relationship, without having the objects
             rosebudCottage = manager.perform(createRpt.using(rosebudCottage, rosebudCottage, firstReport, "is documented by"));
             print(rosebudCottage);
 
-        } catch (Command.PreConditionException e) {
+            // This should throw an exception
+            rosebudCottage = manager.perform(setNumberOfBeds.using(rosebudCottage, 11));
+            print(rosebudCottage);
+        } catch (Command.PreConditionException | Entity.InvalidRelationshipInstanceException e) {
             System.out.printf(e.getMessage());
+            System.exit(1);
         }
 
-
-        // CHANGE EVENT / REPO FUNCTIONALITY - EVENT APPLY() SHOULD TAKE TARGET PARAM FUNCTIONALITY;
+        // Merge UpdateCommand with SimpleUpdateCommand and UpdatedEvent with SimpleUpdatedEvent
         // GET RID OF ALL TODOs
         // SOLVE DEEP COPY QUESTION
-        // ELIMINATE THE NEED FOR BESPOKE CREATE COMMANDS (use template pattern as for updates)
+        //
         // SUPPORT CHILD UPDATES
+        // - ChildUpdateCommandTemplate
+        // - ChildUpdatedEvent
+        // - UpdateChildCommand
         //
-        // CreateChildCommand<HolidayHome> createIssue = new CreateChildCommand<>(report, "contains", issueKernel)
-        // InspectionIssue issue = repository.apply(createIssue);
+        // To support child updates we'll need classes that know the type of the root, parent, and child.  A CUC will
+        // need to be informed of the AggregateRoot to be updated, the relationship to use, the child entity to be updated and the update to do
         //
-        // BiPredicate<InspectionReport, StatusEnum> statusNotClosed = (target, intent) -> target.getStatus() != Status.CLOSED;
-        // BiConsumer<InspectionReport, StatusEnum> changeStatus = (result, intent) -> report.setStatus(intent);
-        //
-        // ChildUpdateCommandTemplate<HolidayHome> updateReportStatus = new ChildUpdateCommandTemplate<>(
-        //      statusNotClosed,
-        //      changeStatus);
-        //
-        // h = repository.apply(
-        //      updateReportStatus.using(
-        //          report,
-        //          Status.PENDING_REVIEW));
-        //
-        // Not totally comfortable with the Repository acting as a command executor
-        //
-        // Then - really need to
-        // - Stop using raw types
-        // - Write unit tests
+        // CHANGE all Templates to Factories?
 
         System.exit(0);
     }

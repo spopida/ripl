@@ -29,7 +29,7 @@ public class CreateChildCommand<R extends AggregateRoot, P extends Entity, C ext
         this.kernel = kernel;
         this.constructor = ctor;
         this.preCondition = preCondition;
-    }
+  }
 
     @Override
     public void checkPreConditions() throws PreConditionException {

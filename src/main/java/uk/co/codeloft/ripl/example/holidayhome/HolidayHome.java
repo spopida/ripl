@@ -6,7 +6,6 @@ import lombok.Setter;
 import uk.co.codeloft.ripl.core.AggregateRoot;
 import uk.co.codeloft.ripl.core.CreatedEvent;
 import uk.co.codeloft.ripl.core.UpdateCommandTemplate;
-import uk.co.codeloft.ripl.example.holidayhome.events.HolidayHomeCreatedEvent;
 
 @Getter
 public class HolidayHome extends AggregateRoot {

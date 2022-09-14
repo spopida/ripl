@@ -9,7 +9,7 @@ public class ChildEntity extends Entity {
 
     private final Entity parent;
 
-    public ChildEntity(ChildCreatedEvent<?, ?, ?> evt) {
+    public ChildEntity(ChildCreatedEvent<?, ?, ?, ?> evt) {
         super(UUID.randomUUID().toString());
         this.parent = evt.getCommand().getParent();
     }

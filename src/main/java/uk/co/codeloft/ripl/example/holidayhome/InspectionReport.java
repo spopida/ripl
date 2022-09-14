@@ -5,7 +5,6 @@ import lombok.Getter;
 import lombok.Setter;
 import uk.co.codeloft.ripl.core.ChildCreatedEvent;
 import uk.co.codeloft.ripl.core.ChildEntity;
-import uk.co.codeloft.ripl.example.holidayhome.events.InspectionReportCreatedEvent;
 
 import java.time.LocalDate;
 

@@ -1,5 +1,6 @@
 package uk.co.codeloft.ripl.core;
 
+import java.util.HashMap;
 import java.util.Map;
 
 public class InMemoryAggregateRootRepository<T extends AggregateRoot> implements AggregateRootRepository<T> {
@@ -21,6 +22,13 @@ public class InMemoryAggregateRootRepository<T extends AggregateRoot> implements
     private Map<String, T> snapshots;
 
     private Map<String, String> latestSnapshotsKeyedByAggregateRootId;
+
+    public InMemoryAggregateRootRepository() {
+        this.commands = new HashMap<>();
+        this.events = new HashMap<>();
+        this.snapshots = new HashMap<>();
+        this.latestSnapshotsKeyedByAggregateRootId = new HashMap<>();
+    }
 
     @Override
     public T getLatest(String id) {

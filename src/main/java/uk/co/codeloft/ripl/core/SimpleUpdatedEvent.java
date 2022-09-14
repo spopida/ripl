@@ -7,7 +7,7 @@ public class SimpleUpdatedEvent <T extends AggregateRoot, O extends Object> exte
     }
 
     @Override
-    public T apply() {
+    public T apply(T target) {
         T newVersion = this.updateAggregateRoot(); // TODO: change how this is done?
 
         SimpleUpdateCommand<T, O> cmd = (SimpleUpdateCommand<T, O>) this.getCommand();
@@ -15,3 +15,4 @@ public class SimpleUpdatedEvent <T extends AggregateRoot, O extends Object> exte
         return cmd.getTarget();
     }
 }
+

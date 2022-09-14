@@ -20,9 +20,9 @@ public class AggregateRoot extends Entity {
     @Setter(value = AccessLevel.PROTECTED)
     private int version;
 
-    private CreatedEvent<?> createdEvent;
+    private CreatedEvent<?, ?> createdEvent;
 
-    public AggregateRoot(CreatedEvent<?> evt) {
+    public AggregateRoot(CreatedEvent<?, ?> evt) {
         super(UUID.randomUUID().toString());
         this.snapshotId = UUID.randomUUID().toString();
         this.version = 1;
