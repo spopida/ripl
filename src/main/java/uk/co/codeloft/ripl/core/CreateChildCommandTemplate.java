@@ -22,15 +22,6 @@ public class CreateChildCommandTemplate<R extends AggregateRoot, P extends Entit
     //TODO: we might be able to get rid of R as an explicit parameter as it should be derivable from the parent
     public CreateChildCommand<R, P, C, K> using(R root, P parent, K kernel, String role) throws Entity.InvalidRelationshipInstanceException {
 
-        Class<?> parentClass = parent.getClass();
-        Class<?> childClass = kernel.getClass().getEnclosingClass();
-
-        if (!Entity.isAllowedRelationship(parentClass, childClass, role))
-            throw new Entity.InvalidRelationshipInstanceException(
-                    String.format(
-                            "Invalid attempt to relate %s with %s using role %s%n",
-                            parentClass.getName(), childClass.getName(), role));
-
         return new CreateChildCommand<>(
                 this.preCondition,
                 kernel,

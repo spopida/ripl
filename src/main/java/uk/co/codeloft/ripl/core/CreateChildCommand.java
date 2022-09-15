@@ -33,9 +33,16 @@ public class CreateChildCommand<R extends AggregateRoot, P extends Entity, C ext
 
     @Override
     public void checkPreConditions() throws PreConditionException {
-        // TODO: CHeck that C and P are related by the role! If not, throw an exception
-
         super.checkPreConditions();
+
+        Class<?> parentClass = parent.getClass();
+        Class<?> childClass = kernel.getClass().getEnclosingClass();
+
+        if (!Entity.isAllowedRelationship(parentClass, childClass, role))
+            throw new Entity.InvalidRelationshipInstanceException(
+                    String.format(
+                            "Invalid attempt to relate %s with %s using role %s%n",
+                            parentClass.getName(), childClass.getName(), role));
 
         if (!preCondition.test(kernel)) throw new PreConditionException("Child pre-condition failed");
     }

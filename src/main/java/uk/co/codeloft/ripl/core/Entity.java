@@ -24,7 +24,7 @@ public abstract class Entity {
     /**
      * Represents an occurrence of an attempt to register an invalid relationship instance.
      */
-    public static class InvalidRelationshipInstanceException extends Exception {
+    public static class InvalidRelationshipInstanceException extends Command.PreConditionException {
 
         protected InvalidRelationshipInstanceException(String message) {
             super(message);

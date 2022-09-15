@@ -104,7 +104,7 @@ public class ExampleRiplApplication {
             // This should throw an exception
             rosebudCottage = manager.perform(setNumberOfBeds.using(rosebudCottage, 11));
             print(rosebudCottage);
-        } catch (Command.PreConditionException | Entity.InvalidRelationshipInstanceException e) {
+        } catch (Command.PreConditionException e) {
             System.out.printf(e.getMessage());
             System.exit(1);
         }
@@ -120,6 +120,19 @@ public class ExampleRiplApplication {
         //
         // To support child updates we'll need classes that know the type of the root, parent, and child.  A CUC will
         // need to be informed of the AggregateRoot to be updated, the relationship to use, the child entity to be updated and the update to do
+        //
+        // We need to figure out how to refer to the updated entity in the ChildUpdatedEvent.  This would have to be by its (internal) id, so
+        // that the event can be applied during re-hydration.  This begs the question of how to search for/retrieve entities. We need the ability to
+        // retrieve a sub-set of entities that match a given predicate.  For example, we might want to find all inspection reports between 2 dates.
+        // To do this we could provide a predicate to a findChild(parent, role, predicate) method.  This would return a List.
+        //
+        // Once we have an instance of a child, the CUC will check the pre-conditions, generate the event, and return a new copy of the aggregate
+        // with the new event applied.  This means that the ChildUpdatedEvent needs to have a reference to the root, the parent, and the relationship (role)
+        // and of course the object parameter that represents the source of the update.  It will also have some kind of a consumer function so that the
+        // logic of the update can be applied.  Hopefully, this consumer function just needs the target (child) entity, and the object, so it can
+        // be a BiConsumer.  The apply logic should be trivial.
+        //
+        // The
         //
         // CHANGE all Templates to Factories?
 
