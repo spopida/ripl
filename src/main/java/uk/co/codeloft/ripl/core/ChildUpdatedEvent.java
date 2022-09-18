@@ -21,6 +21,15 @@ public class ChildUpdatedEvent<R extends AggregateRoot, P extends Entity, C exte
 
     @Override
     public R apply(R rootEntity) {
+        // RE-THINK:
+        // - there are too many arguments being passed...we shouldn't really need the root, parent, or role
+        // - We should:
+        //  - find out which role the child is related to its immediate parent via...this might have to be
+        //    recursive in the general case - we might be nested down multiple levels!
+        //  - Get a deep copy of the aggregate root with the version number instantiated
+        //  - get a reference to the child in the deep copy
+        //  - apply the applyFunc to the child
+
         // Get the target root
         R newVersion = this.updateAggregateRoot(); // TODO: change how this is done?
 
