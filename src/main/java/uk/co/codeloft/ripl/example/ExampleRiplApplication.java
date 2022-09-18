@@ -7,8 +7,10 @@ import uk.co.codeloft.ripl.example.holidayhome.InspectionIssue;
 import uk.co.codeloft.ripl.example.holidayhome.InspectionReport;
 
 import java.time.LocalDate;
+import java.util.List;
 import java.util.function.BiConsumer;
 import java.util.function.BiPredicate;
+import java.util.function.Predicate;
 import java.util.logging.ConsoleHandler;
 import java.util.logging.Logger;
 
@@ -42,7 +44,6 @@ public class ExampleRiplApplication {
                 .ownerName("Catherine Sage")
                 .build();
 
-
         // The template for creating a HolidayHome has no pre-conditions that apply to the kernel (k), and
         // requires the HolidayHome constructor
         CreateCommandTemplate<HolidayHome, HolidayHome.Kernel> createHolidayHome =
@@ -50,7 +51,6 @@ public class ExampleRiplApplication {
 
         // We get an actual command from the template by using the kernel we created above
         CreateCommand<HolidayHome, HolidayHome.Kernel> createRosebudCottage = createHolidayHome.using(kernel);
-
 
         HolidayHome rosebudCottage = null;
         try {
@@ -69,9 +69,6 @@ public class ExampleRiplApplication {
             rosebudCottage = manager.perform(setNumberOfBeds.using(rosebudCottage, 6));
             print(rosebudCottage);
 
-            // TODO: Prove that we get an exception if we violate the pre-condition
-
-
             // Here's an example where an UpdateCommandTemplate instance has been defined as a static variable in
             // the aggregate root class - this offers a nicer level of encapsulation or at least cohesion
             rosebudCottage = manager.perform(HolidayHome.SET_OWNER.using(rosebudCottage,"Catherine Thyme"));
@@ -79,7 +76,7 @@ public class ExampleRiplApplication {
 
             // Now we create a child command template.  This is parameterized with 4 types:
             // - The type of the aggregate root
-            // - The type of the parent
+            // - The type of the immediate parent
             // - The type of child that is being created
             // - The type of the kernel for the child
             // And the constructor for the template takes a predicate on the kernel, and a constructor
@@ -101,6 +98,27 @@ public class ExampleRiplApplication {
             rosebudCottage = manager.perform(createRpt.using(rosebudCottage, rosebudCottage, firstReport, "is documented by"));
             print(rosebudCottage);
 
+            // Now let's get the report we just added
+            Predicate<InspectionReport> findPredicate = rpt -> rpt.getKernel().getInspectorName().equals("Ivor Beadyeye");
+            List<InspectionReport> matchingReports = rosebudCottage.findChildren("is documented by", findPredicate);
+
+            // Now let's try updating an existing child entity
+            BiPredicate<InspectionReport, String> inspectorNameIsNotBlank = (target, name) -> !name.isBlank();  // Pre-condition for changing inspector name
+            BiConsumer<InspectionReport, String> setInspectorName = (report, name) -> report.getKernel().setInspectorName(name);   // Function to change inspector name
+
+            // The template has quite a few params - the root, the parent, the role, the preCondition, and the apply function.
+            // When we actually create a command, all we pass is the child to update, and the new value for the apply function.
+            // Note sure this is optimal - it would be mean creating a new template for each instance of the root/parent...
+            // ...better to pass these to the using function instead, I think
+            UpdateChildCommandTemplate<HolidayHome, HolidayHome, InspectionReport, String> changeInspectorName =
+                    new UpdateChildCommandTemplate<>(rosebudCottage, rosebudCottage, "is documented by", inspectorNameIsNotBlank, setInspectorName);
+
+            for (InspectionReport rpt : matchingReports) {
+                // With each iteration we should get a new version of the aggregate root (that could be a lot of deep copies!)
+                rosebudCottage = manager.perform(changeInspectorName.using(rpt, "Ivor Big Beadyeye"));
+                print(rosebudCottage);
+            }
+
             // This should throw an exception
             rosebudCottage = manager.perform(setNumberOfBeds.using(rosebudCottage, 11));
             print(rosebudCottage);
@@ -109,7 +127,6 @@ public class ExampleRiplApplication {
             System.exit(1);
         }
 
-        // Merge UpdateCommand with SimpleUpdateCommand and UpdatedEvent with SimpleUpdatedEvent
         // GET RID OF ALL TODOs
         // SOLVE DEEP COPY QUESTION
         //

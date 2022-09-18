@@ -16,7 +16,7 @@ public class UpdateCommandTemplate<T extends AggregateRoot, O> {
         this.eventFunc = eventFunc;
     }
 
-    public SimpleUpdateCommand<T, O> using(T target, O o) {
-        return new SimpleUpdateCommand<>(target, this.preCondition, this.eventFunc, o);
+    public UpdateCommand<T, O> using(T target, O o) {
+        return new UpdateCommand<>(target, this.preCondition, this.eventFunc, o);
     }
 }

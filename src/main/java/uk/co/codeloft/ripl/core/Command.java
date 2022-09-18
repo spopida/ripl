@@ -6,7 +6,7 @@ import java.util.UUID;
 
 /**
  * A command that can be performed on an AggregateRoot entity
- * @param <T> The type of the AggregateRoot entity
+ * @param <T> The type of the AggregateRoot entity that is either created or updated
  */
 @Getter
 public abstract class Command<T extends AggregateRoot> {

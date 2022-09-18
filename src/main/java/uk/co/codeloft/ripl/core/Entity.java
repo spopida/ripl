@@ -3,6 +3,7 @@ package uk.co.codeloft.ripl.core;
 import lombok.Getter;
 
 import java.util.*;
+import java.util.function.Predicate;
 
 /**
  * The base class for all entities, whether they are aggregates or children
@@ -35,10 +36,10 @@ public abstract class Entity {
      * Nested class used to represent a parent-child relationship between a parent class and a child class
      */
     private static class ParentChildRelationship {
-        private final Class parentClass;
-        private final Class childClass;
+        private final Class<?> parentClass;
+        private final Class<?> childClass;
 
-        protected ParentChildRelationship(Class parent, Class child) {
+        protected ParentChildRelationship(Class<?> parent, Class<?> child) {
             // The parent class must be Entity or a sub-type
             if (!Entity.class.isAssignableFrom(parent)) {
                 throw new InvalidRelationshipTypeException(Entity.class.getName() + " must be assignable from " + parent.getName());
@@ -70,7 +71,7 @@ public abstract class Entity {
      *             other kinds of relationships with cars, but not as the owner.  For example, they could be an insured driver (without
      *             necessarily being the owner).
      */
-    public static void allowRelationship(Class parentClass, Class childClass, String role) {
+    public static void allowRelationship(Class<?> parentClass, Class<?> childClass, String role) {
 
         // TODO: throw an exception if role already exists for the parent class
 
@@ -78,10 +79,10 @@ public abstract class Entity {
         Entity.allowedRelationships.put(role, rel);
     }
 
-    public static boolean isAllowedRelationship(Class expectedParentClass, Class expectedChildClass, String role) {
+    public static boolean isAllowedRelationship(Class<?> expectedParentClass, Class<?> expectedChildClass, String role) {
         ParentChildRelationship rel = Entity.allowedRelationships.get(role);
 
-        return (rel != null) ? rel.childClass == expectedChildClass && rel.parentClass == expectedParentClass : false;
+        return rel != null && rel.childClass == expectedChildClass && rel.parentClass == expectedParentClass;
     }
     //-- Non-static members --//
 
@@ -145,6 +146,38 @@ public abstract class Entity {
             return this.getRoot();
         else
             return (AggregateRoot)this;
+    }
+
+    @SuppressWarnings("unchecked") // TODO: See body
+    public <T extends ChildEntity> List<T> findChildren(String role, Predicate<T> p) {
+        List<T> result = new ArrayList<>();
+
+        // Get the relationship meta data using the role
+        ParentChildRelationship rel = Entity.allowedRelationships.get(role);
+
+        if (rel != null) {
+            // Get all children that match the predicate
+            ChildCollection<ChildEntity> children = this.childCollections.get(role);
+
+            if (children != null) {
+                for (ChildEntity child : children.asList()) {
+                    if (child.getClass().isAssignableFrom(rel.childClass)) {
+                        // See if the predicate holds
+                        if (p.test((T)child)) {
+                            // TODO: Try to resolve this warning (the one that happens without @SuppressWarnings)
+                            result.add((T) child);
+                        }
+                    } else {
+                        throw new ClassCastException(
+                                String.format("Class %s is not assignable from class %s%n", child.getClass().getName(), rel.childClass.getName()));
+                    }
+                }
+            }
+        } else {
+            throw new IllegalArgumentException(String.format("Role %s does not identify a valid relationship", role));
+        }
+
+        return result;
     }
 
     public String toString() {

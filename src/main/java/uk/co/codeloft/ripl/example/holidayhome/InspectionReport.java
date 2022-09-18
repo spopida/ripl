@@ -8,6 +8,7 @@ import uk.co.codeloft.ripl.core.ChildEntity;
 
 import java.time.LocalDate;
 
+@Getter
 public class InspectionReport extends ChildEntity {
 
     //-- Static Members --//
