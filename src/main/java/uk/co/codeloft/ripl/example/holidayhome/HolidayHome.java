@@ -57,12 +57,6 @@ public class HolidayHome extends AggregateRoot {
         }
     }
 
-    // A command template to set the owner (including a pre-condition and an action)
-    public static final UpdateCommandTemplate<HolidayHome, String> SET_OWNER = new UpdateCommandTemplate<>(
-            HolidayHome::checkOwner,
-            //(target, owner) -> !owner.isBlank(),
-            (result, owner) -> result.getKernel().setOwnerName(owner));
-
     //-- Non-static Members --//
 
     /**

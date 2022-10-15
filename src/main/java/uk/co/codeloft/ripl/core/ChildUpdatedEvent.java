@@ -3,15 +3,15 @@ package uk.co.codeloft.ripl.core;
 import lombok.Getter;
 
 @Getter
-public class ChildUpdatedEvent<R extends AggregateRoot, P extends Entity, C extends ChildEntity, O> extends Event<R> {
+public class ChildUpdatedEvent<R extends AggregateRoot, C extends ChildEntity, O> extends Event<R> {
 
     private final C targetChild;
     private final O param;
 
     private final R aggregateRoot;
-    private final UpdateChildCommand<R, P, C, O> command;
+    private final UpdateChildCommand<R, C, O> command;
 
-    public ChildUpdatedEvent(UpdateChildCommand<R, P, C, O> cmd) {
+    public ChildUpdatedEvent(UpdateChildCommand<R, C, O> cmd) {
         super(cmd);
         this.targetChild = cmd.getTargetChild();
         this.param = cmd.getParam();
@@ -37,7 +37,7 @@ public class ChildUpdatedEvent<R extends AggregateRoot, P extends Entity, C exte
         // - here we need to get a reference to the SAME child from the new copy
 
         // Get the command
-        UpdateChildCommand<R, P, C, O> cmd = (UpdateChildCommand<R, P, C,  O>) this.getCommand();
+        UpdateChildCommand<R, C, O> cmd = (UpdateChildCommand<R, C,  O>) this.getCommand();
 
         // Call the apply function
         cmd.getApplyFunc().accept(this.targetChild, this.param);

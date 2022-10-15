@@ -138,10 +138,12 @@ public abstract class Entity {
 
         ChildCollection<ChildEntity> children = childCollections.get(role);
         children.add(child);
+        this.getRoot().addDescendent(child);
     }
 
     public AggregateRoot getRoot() {
         // recurse up the parents until we find one that cannot be assigned to ChildEntity - that must be the root
+        // TODO: This looks like infinite recursion!
         if (this.getClass().isAssignableFrom(ChildEntity.class))
             return this.getRoot();
         else

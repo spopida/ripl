@@ -6,7 +6,7 @@ import java.util.function.BiConsumer;
 import java.util.function.BiPredicate;
 
 @Getter
-public class UpdateChildCommand<R extends AggregateRoot, P extends Entity, C extends ChildEntity, O> extends Command<R> {
+public class UpdateChildCommand<R extends AggregateRoot, C extends ChildEntity, O> extends Command<R> {
 
     private final BiPredicate<C, O> preCondition;
 
@@ -39,7 +39,7 @@ public class UpdateChildCommand<R extends AggregateRoot, P extends Entity, C ext
 
 
     @Override
-    public ChildUpdatedEvent<R, P, C, O> getEvent() {
-        return new ChildUpdatedEvent<R, P, C, O>(this);
+    public ChildUpdatedEvent<R, C, O> getEvent() {
+        return new ChildUpdatedEvent<R, C, O>(this);
     }
 }
