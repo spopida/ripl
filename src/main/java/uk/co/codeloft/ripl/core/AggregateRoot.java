@@ -17,12 +17,6 @@ public class AggregateRoot extends Entity {
      */
     private final String snapshotId;
 
-    /**
-     * The version number of this instance
-     */
-    @Setter(value = AccessLevel.PROTECTED)
-    private int version;
-
     private final CreatedEvent<?, ?> createdEvent;
 
     /**
@@ -33,7 +27,6 @@ public class AggregateRoot extends Entity {
     public AggregateRoot(CreatedEvent<?, ?> evt) {
         super(UUID.randomUUID().toString());
         this.snapshotId = UUID.randomUUID().toString();
-        this.version = 1;
         this.createdEvent = evt;
         this.allDescendents = new HashMap<>();
         // Special case - we put this AggregateRoot instance in its map of descendents
@@ -59,11 +52,6 @@ public class AggregateRoot extends Entity {
 
     private String asString() {
         return
-                String.format("Version: %d%n", this.getVersion()) +
                 String.format("From Snapshot: %s%n", this.getSnapshotId());
-    }
-
-    public void evolve() {
-        this.setVersion(this.version + 1);
     }
 }

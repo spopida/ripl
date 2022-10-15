@@ -2,6 +2,7 @@ package uk.co.codeloft.ripl.core;
 
 import lombok.Getter;
 
+import java.time.Instant;
 import java.util.UUID;
 
 /**
@@ -16,6 +17,11 @@ public abstract class Event<T extends AggregateRoot> {
     private String id;
 
     /**
+     * The instant that this event happened
+     */
+    private Instant timestamp;
+
+    /**
      * The command that resulted in this event
      */
     private Command<T> command;
@@ -23,6 +29,7 @@ public abstract class Event<T extends AggregateRoot> {
     protected Event(Command<T> command) {
         this.id = UUID.randomUUID().toString();
         this.command = command;
+        this.timestamp = Instant.now();
     }
 
     public abstract T apply(T rootEntity);

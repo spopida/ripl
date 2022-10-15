@@ -1,7 +1,10 @@
 package uk.co.codeloft.ripl.core;
 
+import lombok.AccessLevel;
 import lombok.Getter;
+import lombok.Setter;
 
+import java.time.Instant;
 import java.util.*;
 import java.util.function.Predicate;
 
@@ -93,6 +96,21 @@ public abstract class Entity {
     private String id;
 
     /**
+     * The version number of this instance
+     */
+    private int version;
+
+    /**
+     * The instant of creation
+     */
+    private Instant createdAt;
+
+    /**
+     * The instant of the last update
+     */
+    private Instant updatedAt;
+
+    /**
      * The collections of children, kept in a Map keyed by the locally-unique role that
      * describes the parent-child relationship (for example, a Person entity might have "achieved"
      * multiple qualifications; here the role is "achieved").  If there were two sets of qualifications (say,
@@ -102,6 +120,9 @@ public abstract class Entity {
 
     protected Entity(String id) {
         this.id = id;
+        this.version = 1;
+        this.createdAt = Instant.now();
+        this.updatedAt = this.createdAt;
         this.childCollections = new HashMap<>();
 
         // Initialise all the allowable child collections
@@ -115,6 +136,20 @@ public abstract class Entity {
     public final Entity setId(String id) {
         this.id = id;
         return this;
+    }
+
+    protected void mutate() {
+        // recurse up the parents until we find one that cannot be assigned to ChildEntity - that must be the root
+        if (ChildEntity.class.isAssignableFrom(this.getClass())) {
+            ((ChildEntity)this).getParent().mutate();
+        }
+
+        this.evolve();
+    }
+
+    private void evolve() {
+        this.version += 1;
+        this.updatedAt = Instant.now();
     }
 
     public List<ChildEntity> getChildren(String role) {
@@ -138,15 +173,16 @@ public abstract class Entity {
 
         ChildCollection<ChildEntity> children = childCollections.get(role);
         children.add(child);
-        this.getRoot().addDescendent(child);
+        AggregateRoot root = this.getRoot();
+        root.addDescendent(child);
+        this.mutate();
     }
 
     public AggregateRoot getRoot() {
         // recurse up the parents until we find one that cannot be assigned to ChildEntity - that must be the root
-        // TODO: This looks like infinite recursion!
-        if (this.getClass().isAssignableFrom(ChildEntity.class))
-            return this.getRoot();
-        else
+        if (ChildEntity.class.isAssignableFrom(this.getClass())) {
+            return ((ChildEntity)this).getParent().getRoot();
+        } else
             return (AggregateRoot)this;
     }
 
@@ -183,7 +219,12 @@ public abstract class Entity {
     }
 
     public String toString() {
-        return String.format("Entity Id: %s%n", this.getId());
+        return
+                String.format("Entity Id: %s%n", this.getId()) +
+                String.format("Version: %d%n", this.version) +
+                String.format("Created At: %s%n", this.createdAt) +
+                String.format("Updated At: %s%n", this.updatedAt);
+
     }
 
     public String allChildren() {

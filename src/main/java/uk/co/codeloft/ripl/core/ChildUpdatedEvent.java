@@ -21,17 +21,10 @@ public class ChildUpdatedEvent<R extends AggregateRoot, C extends ChildEntity, O
 
     @Override
     public R apply(R rootEntity) {
-        // RE-THINK:
-        // - there are too many arguments being passed...we shouldn't really need the root, parent, or role
-        // - We should:
-        //  - find out which role the child is related to its immediate parent via...this might have to be
-        //    recursive in the general case - we might be nested down multiple levels!
-        //  - Get a deep copy of the aggregate root with the version number instantiated
-        //  - get a reference to the child in the deep copy
-        //  - apply the applyFunc to the child
 
+        //this.aggregateRoot.mutate();
         // Get the target root
-        R newVersion = this.updateAggregateRoot(); // TODO: change how this is done?
+        //R newVersion = this.updateAggregateRoot(); // TODO: change how this is done?
 
         // Maybe: Check that the child exists in the target root??
         // - here we need to get a reference to the SAME child from the new copy
@@ -41,13 +34,15 @@ public class ChildUpdatedEvent<R extends AggregateRoot, C extends ChildEntity, O
 
         // Call the apply function
         cmd.getApplyFunc().accept(this.targetChild, this.param);
+        this.targetChild.mutate();
 
         // Return the root
-        return newVersion;
+        return this.aggregateRoot;
     }
 
 
     // TODO: Change this - inflate from repo?
+    /*
     protected R updateAggregateRoot() {
         // TODO: Take a deep copy of the object
         R deepCopy = (R)this.aggregateRoot; // TODO: here!
@@ -58,4 +53,6 @@ public class ChildUpdatedEvent<R extends AggregateRoot, C extends ChildEntity, O
         // TODO: set lastUpdate on the aggregate
         return deepCopy;
     }
+
+     */
 }
