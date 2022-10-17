@@ -22,7 +22,6 @@ public class ChildCreatedEvent<R extends AggregateRoot, P extends Entity, C exte
         this.kernel = kernel;
     }
 
-    // TODO: Not sure if we need this override?
     @Override
     public CreateChildCommand<R, P, C, K> getCommand() {
         return (CreateChildCommand<R, P, C, K> ) super.getCommand();

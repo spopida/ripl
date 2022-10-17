@@ -2,6 +2,7 @@ package uk.co.codeloft.ripl.example.holidayhome;
 
 import lombok.Getter;
 import lombok.Setter;
+import uk.co.codeloft.ripl.core.ChildCreatedEvent;
 import uk.co.codeloft.ripl.core.ChildEntity;
 
 /**
@@ -11,9 +12,10 @@ import uk.co.codeloft.ripl.core.ChildEntity;
 @Setter
 public class InspectionIssue extends ChildEntity {
 
-    public InspectionIssue() {
-        //TODO
-        super(null);
-    }
     private String issueDescription;
+
+    public InspectionIssue(ChildCreatedEvent<HolidayHome, InspectionReport, InspectionIssue, String> event, String description) {
+        super(event);
+        this.issueDescription = description;
+    }
 }

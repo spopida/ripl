@@ -84,6 +84,7 @@ public class ExampleRiplApplication {
 
             for (InspectionReport rpt : matchingReports) {
                 rosebudCottage = factory.changeInspectorName(rosebudCottage.getId(), rpt.getId(), "Ivor Massive Beadyeye");
+                rosebudCottage = factory.createInspectionIssue(rosebudCottage.getId(), rpt.getId(), "Dripping kitchen tap");
                 print(rosebudCottage);
             }
 
