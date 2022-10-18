@@ -35,11 +35,22 @@ public class CreateChildCommand<R extends AggregateRoot, P extends Entity, C ext
     public void checkPreConditions() throws PreConditionException {
         super.checkPreConditions();
 
+        // Use the role to get the definition of the relationship
+        AggregateRoot.ParentChildRelationship rel = AggregateRoot.allowedRelationships.get(role);
+
+        Class<?> parentClass = rel.getParentClass();
+        Class<?> childClass = rel.getChildClass();
+
+        /*
         Class<?> parentClass = parent.getClass();
         Class<?> childClass = kernel.getClass().getEnclosingClass();
 
-        if (!Entity.isAllowedRelationship(parentClass, childClass, role))
-            throw new Entity.InvalidRelationshipInstanceException(
+         */
+
+
+
+        if (!AggregateRoot.isAllowedRelationship(parentClass, childClass, role))
+            throw new AggregateRoot.InvalidRelationshipInstanceException(
                     String.format(
                             "Invalid attempt to relate %s with %s using role %s%n",
                             parentClass.getName(), childClass.getName(), role));

@@ -15,81 +15,6 @@ import java.util.function.Predicate;
 public abstract class Entity {
 
     /**
-     * Represents an occurrence of an attempt to register an invalid relationship type.  If this happens
-     * There is little the client can do; a coding fix is needed, hence this is a RuntimeException
-     */
-    private static class InvalidRelationshipTypeException extends RuntimeException {
-
-        protected InvalidRelationshipTypeException(String message) {
-            super(message);
-        }
-    }
-
-    /**
-     * Represents an occurrence of an attempt to register an invalid relationship instance.
-     */
-    public static class InvalidRelationshipInstanceException extends Command.PreConditionException {
-
-        protected InvalidRelationshipInstanceException(String message) {
-            super(message);
-        }
-    }
-
-    /**
-     * Nested class used to represent a parent-child relationship between a parent class and a child class
-     */
-    private static class ParentChildRelationship {
-        private final Class<?> parentClass;
-        private final Class<?> childClass;
-
-        protected ParentChildRelationship(Class<?> parent, Class<?> child) {
-            // The parent class must be Entity or a sub-type
-            if (!Entity.class.isAssignableFrom(parent)) {
-                throw new InvalidRelationshipTypeException(Entity.class.getName() + " must be assignable from " + parent.getName());
-            }
-
-            // The child class must be ChildEntity or a sub-type
-            if (!ChildEntity.class.isAssignableFrom(child)) {
-                throw new InvalidRelationshipTypeException(ChildEntity.class.getName() + " must be assignable from " + child.getName());
-            }
-
-            this.parentClass = parent;
-            this.childClass = child;
-        }
-    }
-
-    /**
-     * A static map of declared parent-child relationships.  Such relationships are class-level so
-     * there is no need for instance-level values
-     */
-    private static final Map<String, ParentChildRelationship> allowedRelationships = new HashMap<>();
-
-    /**
-     * Allow a parent-child relationship between two classes, distinguished by a role.  Note the invariants defined for each parameter
-     * @param parentClass The class of object that act as the parent in the relationship
-     * @param childClass the class of object that can act as the child
-     * @param role the role that distinguishes this parent-child relationship.  This distinction is achieved because the role
-     *             must be unique across all relationships with the same parent class.  For example, a Person may be the owner of many Cars.
-     *             Here the Person class is the parent class, the Car class is the child class, and the role is owner.  A Person may have
-     *             other kinds of relationships with cars, but not as the owner.  For example, they could be an insured driver (without
-     *             necessarily being the owner).
-     */
-    public static void allowRelationship(Class<?> parentClass, Class<?> childClass, String role) {
-
-        // TODO: throw an exception if role already exists for the parent class
-
-        ParentChildRelationship rel = new ParentChildRelationship(parentClass, childClass);
-        Entity.allowedRelationships.put(role, rel);
-    }
-
-    public static boolean isAllowedRelationship(Class<?> expectedParentClass, Class<?> expectedChildClass, String role) {
-        ParentChildRelationship rel = Entity.allowedRelationships.get(role);
-
-        return rel != null && rel.childClass == expectedChildClass && rel.parentClass == expectedParentClass;
-    }
-    //-- Non-static members --//
-
-    /**
      * The id of this entity.  This remains immutable over the lifetime of
      * the entity, and as it evolves through different versions
      */
@@ -103,7 +28,7 @@ public abstract class Entity {
     /**
      * The instant of creation
      */
-    private Instant createdAt;
+    private final Instant createdAt;
 
     /**
      * The instant of the last update
@@ -126,16 +51,11 @@ public abstract class Entity {
         this.childCollections = new HashMap<>();
 
         // Initialise all the allowable child collections
-        Entity.allowedRelationships.forEach((s, parentChildRelationship) -> {
+        AggregateRoot.allowedRelationships.forEach((s, parentChildRelationship) -> {
             // Only create a child collection if the class of this entity is the parent (or a sub-type)
-            if (parentChildRelationship.parentClass.isAssignableFrom(this.getClass()))
+            if (parentChildRelationship.getParentClass().isAssignableFrom(this.getClass()))
                 this.childCollections.put(s, new ChildCollection<>());
         });
-    }
-
-    public final Entity setId(String id) {
-        this.id = id;
-        return this;
     }
 
     protected void mutate() {
@@ -164,11 +84,11 @@ public abstract class Entity {
         Class<?> parentClass = this.getClass();
         Class<?> childClass = child.getClass();
 
-        ParentChildRelationship rel = new ParentChildRelationship(this.getClass(), child.getClass());
+        AggregateRoot.ParentChildRelationship rel = new AggregateRoot.ParentChildRelationship(this.getClass(), child.getClass());
 
-        ParentChildRelationship found = allowedRelationships.get(role);
+        AggregateRoot.ParentChildRelationship found = AggregateRoot.allowedRelationships.get(role);
         if (found == null) {
-            throw new InvalidRelationshipTypeException(String.format("Class %s cannot be a child of %s%n", childClass.getName(), parentClass.getName()));
+            throw new AggregateRoot.InvalidRelationshipTypeException(String.format("Class %s cannot be a child of %s%n", childClass.getName(), parentClass.getName()));
         }
 
         ChildCollection<ChildEntity> children = childCollections.get(role);
@@ -191,7 +111,7 @@ public abstract class Entity {
         List<T> result = new ArrayList<>();
 
         // Get the relationship meta data using the role
-        ParentChildRelationship rel = Entity.allowedRelationships.get(role);
+        AggregateRoot.ParentChildRelationship rel = AggregateRoot.allowedRelationships.get(role);
 
         if (rel != null) {
             // Get all children that match the predicate
@@ -199,7 +119,7 @@ public abstract class Entity {
 
             if (children != null) {
                 for (ChildEntity child : children.asList()) {
-                    if (child.getClass().isAssignableFrom(rel.childClass)) {
+                    if (child.getClass().isAssignableFrom(rel.getChildClass())) {
                         // See if the predicate holds
                         if (p.test((T)child)) {
                             // TODO: Try to resolve this warning (the one that happens without @SuppressWarnings)
@@ -207,7 +127,7 @@ public abstract class Entity {
                         }
                     } else {
                         throw new ClassCastException(
-                                String.format("Class %s is not assignable from class %s%n", child.getClass().getName(), rel.childClass.getName()));
+                                String.format("Class %s is not assignable from class %s%n", child.getClass().getName(), rel.getChildClass().getName()));
                     }
                 }
             }
@@ -220,6 +140,7 @@ public abstract class Entity {
 
     public String toString() {
         return
+                String.format("Type: %s%n", this.getClass().getSimpleName()) +
                 String.format("Entity Id: %s%n", this.getId()) +
                 String.format("Version: %d%n", this.version) +
                 String.format("Created At: %s%n", this.createdAt) +
@@ -239,6 +160,8 @@ public abstract class Entity {
                 list.forEach(child -> {
                     sb.append(String.format("----------%n"));
                     sb.append(child.toString());
+                    sb.append(String.format("<end>%n"));
+                    sb.append(child.allChildren());  // Recurse
                 });
             }
         });

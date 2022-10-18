@@ -18,4 +18,13 @@ public class InspectionIssue extends ChildEntity {
         super(event);
         this.issueDescription = description;
     }
+
+    private String asString() {
+        return String.format("Issue: %s%n", this.issueDescription == null ? "null" : this.issueDescription);
+    }
+
+    public String toString() {
+        return super.toString() + this.asString();
+    }
+
 }

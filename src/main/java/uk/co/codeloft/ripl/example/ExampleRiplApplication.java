@@ -28,9 +28,9 @@ public class ExampleRiplApplication {
         // Declare parent-child relationships - allow inspection reports as children of the aggregate root,
         // and allow inspection issues as children of inspection reports.
 
-        Entity.allowRelationship(HolidayHome.class, InspectionReport.class, "is documented by");
-        Entity.allowRelationship(HolidayHome.class, Booking.class, "is booked by");
-        Entity.allowRelationship(InspectionReport.class, InspectionIssue.class, "contains");
+        AggregateRoot.allowRelationship(HolidayHome.class, InspectionReport.class, "is documented by");
+        AggregateRoot.allowRelationship(HolidayHome.class, Booking.class, "is booked by");
+        AggregateRoot.allowRelationship(InspectionReport.class, InspectionIssue.class, "contains");
 
         // Build a HolidayHome kernel
         HolidayHome.Kernel kernel = HolidayHome.Kernel.builder()
