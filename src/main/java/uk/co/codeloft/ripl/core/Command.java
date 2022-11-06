@@ -19,8 +19,12 @@ public abstract class Command<T extends AggregateRoot> {
 
     private final String id;
 
-    protected Command() {
+    private final AggregateRootFactory<T> origin;
+
+    protected Command(AggregateRootFactory<T> origin)
+    {
         this.id = UUID.randomUUID().toString();
+        this.origin = origin;
     }
 
     /**

@@ -35,6 +35,8 @@ public abstract class Entity {
      */
     private Instant updatedAt;
 
+    private final AggregateRootFactory<?> factory;
+
     /**
      * The collections of children, kept in a Map keyed by the locally-unique role that
      * describes the parent-child relationship (for example, a Person entity might have "achieved"
@@ -43,7 +45,8 @@ public abstract class Entity {
      */
     private Map<String, ChildCollection<ChildEntity>> childCollections = new HashMap<>();
 
-    protected Entity(String id) {
+    protected Entity(AggregateRootFactory<?> factory, String id) {
+        this.factory = factory;
         this.id = id;
         this.version = 1;
         this.createdAt = Instant.now();
@@ -51,12 +54,14 @@ public abstract class Entity {
         this.childCollections = new HashMap<>();
 
         // Initialise all the allowable child collections
-        AggregateRoot.allowedRelationships.forEach((s, parentChildRelationship) -> {
+        this.factory.getAllowedChildRelationships().forEach((s, parentChildRelationship) -> {
             // Only create a child collection if the class of this entity is the parent (or a sub-type)
             if (parentChildRelationship.getParentClass().isAssignableFrom(this.getClass()))
                 this.childCollections.put(s, new ChildCollection<>());
         });
     }
+
+
 
     protected void mutate() {
         // recurse up the parents until we find one that cannot be assigned to ChildEntity - that must be the root
@@ -84,11 +89,11 @@ public abstract class Entity {
         Class<?> parentClass = this.getClass();
         Class<?> childClass = child.getClass();
 
-        AggregateRoot.ParentChildRelationship rel = new AggregateRoot.ParentChildRelationship(this.getClass(), child.getClass());
+        AggregateRootFactory.ParentChildRelationship rel = new AggregateRootFactory.ParentChildRelationship(this.getClass(), child.getClass());
 
-        AggregateRoot.ParentChildRelationship found = AggregateRoot.allowedRelationships.get(role);
+        AggregateRootFactory.ParentChildRelationship found = this.factory.allowedChildRelationships.get(role);
         if (found == null) {
-            throw new AggregateRoot.InvalidRelationshipTypeException(String.format("Class %s cannot be a child of %s%n", childClass.getName(), parentClass.getName()));
+            throw new AggregateRootFactory.InvalidRelationshipTypeException(String.format("Class %s cannot be a child of %s%n", childClass.getName(), parentClass.getName()));
         }
 
         ChildCollection<ChildEntity> children = childCollections.get(role);
@@ -111,7 +116,7 @@ public abstract class Entity {
         List<T> result = new ArrayList<>();
 
         // Get the relationship meta data using the role
-        AggregateRoot.ParentChildRelationship rel = AggregateRoot.allowedRelationships.get(role);
+        AggregateRootFactory.ParentChildRelationship rel = this.factory.allowedChildRelationships.get(role);
 
         if (rel != null) {
             // Get all children that match the predicate

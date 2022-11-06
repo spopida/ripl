@@ -18,8 +18,11 @@ public class CreatedEvent<T extends AggregateRoot, K> extends Event<T> {
      * @param createCmd the command that led to the creation of this event
      * @param ctor the constructor needed to create the first version of the AggregateRoot
      */
-    protected CreatedEvent(CreateCommand<T, K> createCmd, BiFunction<CreatedEvent<T, K>, K, T> ctor) {
-        super(createCmd);
+    protected CreatedEvent(
+            AggregateRootFactory<T> factory,
+            CreateCommand<T, K> createCmd,
+            BiFunction<CreatedEvent<T, K>, K, T> ctor) {
+        super(factory, createCmd);
         this.kernel = createCmd.getKernel();
         this.constructor = ctor;
     }

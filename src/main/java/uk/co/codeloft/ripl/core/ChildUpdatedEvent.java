@@ -11,8 +11,8 @@ public class ChildUpdatedEvent<R extends AggregateRoot, C extends ChildEntity, O
     private final R aggregateRoot;
     private final UpdateChildCommand<R, C, O> command;
 
-    public ChildUpdatedEvent(UpdateChildCommand<R, C, O> cmd) {
-        super(cmd);
+    public ChildUpdatedEvent(AggregateRootFactory<R> factory, UpdateChildCommand<R, C, O> cmd) {
+        super(factory, cmd);
         this.targetChild = cmd.getTargetChild();
         this.param = cmd.getParam();
         this.command = cmd;

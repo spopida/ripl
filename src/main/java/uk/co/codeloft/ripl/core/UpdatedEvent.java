@@ -7,8 +7,8 @@ public class UpdatedEvent<T extends AggregateRoot, O extends Object> extends Eve
      */
     private final T aggregateRoot;
 
-    public UpdatedEvent(UpdateCommand<T, O> command) {
-        super(command);
+    public UpdatedEvent(AggregateRootFactory<T> factory, UpdateCommand<T, O> command) {
+        super(factory, command);
         this.aggregateRoot = command.getTarget();
     }
 

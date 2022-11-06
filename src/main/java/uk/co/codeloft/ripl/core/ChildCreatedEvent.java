@@ -10,12 +10,13 @@ public class ChildCreatedEvent<R extends AggregateRoot, P extends Entity, C exte
     private final String role;
 
     public ChildCreatedEvent(
+            AggregateRootFactory<R> factory,
             CreateChildCommand<R, P, C, K> command,
             P parent,
             String role,
             K kernel,
             BiFunction<ChildCreatedEvent<R, P, C, K>, K, C> ctor) {
-        super(command);
+        super(factory, command);
         this.parent = parent;
         this.role = role;
         this.constructor = ctor;

@@ -20,8 +20,8 @@ public class UpdateChildCommand<R extends AggregateRoot, C extends ChildEntity, 
 
     private final String role;
 
-    public UpdateChildCommand(R targetRoot, String role, C targetChild, final BiPredicate<C, O> preCondition, final BiConsumer<C, O> applyFunc, O param) {
-        super();
+    public UpdateChildCommand(AggregateRootFactory<R> origin, R targetRoot, String role, C targetChild, final BiPredicate<C, O> preCondition, final BiConsumer<C, O> applyFunc, O param) {
+        super(origin);
         this.targetChild = targetChild;
         this.role = role;
         this.preCondition = preCondition;
@@ -40,6 +40,6 @@ public class UpdateChildCommand<R extends AggregateRoot, C extends ChildEntity, 
 
     @Override
     public ChildUpdatedEvent<R, C, O> getEvent() {
-        return new ChildUpdatedEvent<R, C, O>(this);
+        return new ChildUpdatedEvent<R, C, O>( this.getOrigin(), this);
     }
 }

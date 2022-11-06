@@ -13,12 +13,12 @@ public class UpdateCommand<T extends AggregateRoot, O> extends Command<T> {
     private final BiConsumer<T, O> applyFunc;
     private final O param;
 
-    public UpdateCommand(T target, BiConsumer<T, O> applyFunc, O param) {
-        this(target, null, applyFunc, param);
+    public UpdateCommand(AggregateRootFactory<T> origin, T target, BiConsumer<T, O> applyFunc, O param) {
+        this(origin, target, null, applyFunc, param);
     }
 
-    public UpdateCommand(T target, BiPredicate<T, O> preCond, BiConsumer<T, O> applyFunc, O param) {
-        super();
+    public UpdateCommand(AggregateRootFactory<T> origin,T target, BiPredicate<T, O> preCond, BiConsumer<T, O> applyFunc, O param) {
+        super(origin);
         this.target = target;
         this.preCondition = preCond;
         this.applyFunc = applyFunc;
@@ -34,6 +34,6 @@ public class UpdateCommand<T extends AggregateRoot, O> extends Command<T> {
 
     @Override
     public UpdatedEvent<T, O> getEvent() {
-        return new UpdatedEvent<>(this);
+        return new UpdatedEvent<>(this.getOrigin(), this);
     }
 }

@@ -16,26 +16,31 @@ public class AggregateRoot extends Entity {
      * Represents an occurrence of an attempt to register an invalid relationship type.  If this happens
      * There is little the client can do; a coding fix is needed, hence this is a RuntimeException
      */
+/*
     static class InvalidRelationshipTypeException extends RuntimeException {
 
         protected InvalidRelationshipTypeException(String message) {
             super(message);
         }
     }
+*/
 
     /**
      * Represents an occurrence of an attempt to register an invalid relationship instance.
      */
+/*
     public static class InvalidRelationshipInstanceException extends Command.PreConditionException {
 
         protected InvalidRelationshipInstanceException(String message) {
             super(message);
         }
     }
+*/
 
     /**
      * Nested class used to represent a parent-child relationship between a parent class and a child class
      */
+/*
     @Getter
     protected static class ParentChildRelationship {
         private final Class<?> parentClass;
@@ -56,12 +61,15 @@ public class AggregateRoot extends Entity {
             this.childClass = child;
         }
     }
+*/
 
     /**
      * A static map of declared parent-child relationships.  Such relationships are class-level so
      * there is no need for instance-level values
      */
+/*
     protected static final Map<String, AggregateRoot.ParentChildRelationship> allowedRelationships = new HashMap<>();
+*/
 
     /**
      * Allow a parent-child relationship between two classes, distinguished by a role.  Note the invariants defined for each parameter
@@ -73,6 +81,7 @@ public class AggregateRoot extends Entity {
      *             other kinds of relationships with cars, but not as the owner.  For example, they could be an insured driver (without
      *             necessarily being the owner).
      */
+/*
     public static void allowRelationship(Class<?> parentClass, Class<?> childClass, String role) {
 
         // TODO: throw an exception if role already exists for the parent class
@@ -86,6 +95,7 @@ public class AggregateRoot extends Entity {
 
         return rel != null && rel.childClass == expectedChildClass && rel.parentClass == expectedParentClass;
     }
+*/
 
     /**
      * The id of the snapshot that underpins this version of the aggregate.
@@ -99,8 +109,14 @@ public class AggregateRoot extends Entity {
      */
     private final Map<String, Entity> allDescendents;
 
+    private AggregateRootFactory<?> factory;
+
+    protected void setFactory(AggregateRootFactory<?> f) {
+        this.factory = f;
+    }
+
     public AggregateRoot(CreatedEvent<?, ?> evt) {
-        super(UUID.randomUUID().toString());
+        super(evt.getFactory(), UUID.randomUUID().toString());
         this.snapshotId = UUID.randomUUID().toString();
         this.createdEvent = evt;
         this.allDescendents = new HashMap<>();

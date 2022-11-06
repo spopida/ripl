@@ -22,8 +22,8 @@ public class CreateChildCommand<R extends AggregateRoot, P extends Entity, C ext
 
 
     // NOTE - we don't need to pass in the AggregateRoot as target because it should be derivable from the P parent
-    public CreateChildCommand(Predicate<K> preCondition, K kernel, P parent, String role, BiFunction<ChildCreatedEvent<R, P, C, K>, K, C> ctor) {
-        super();
+    public CreateChildCommand(AggregateRootFactory<R> origin, Predicate<K> preCondition, K kernel, P parent, String role, BiFunction<ChildCreatedEvent<R, P, C, K>, K, C> ctor) {
+        super(origin);
         this.parent = parent;
         this.role = role;
         this.kernel = kernel;
@@ -36,7 +36,8 @@ public class CreateChildCommand<R extends AggregateRoot, P extends Entity, C ext
         super.checkPreConditions();
 
         // Use the role to get the definition of the relationship
-        AggregateRoot.ParentChildRelationship rel = AggregateRoot.allowedRelationships.get(role);
+        //AggregateRoot.ParentChildRelationship rel = AggregateRoot.allowedRelationships.get(role);
+        AggregateRootFactory.ParentChildRelationship rel = this.getOrigin().getAllowedChildRelationships().get(role);
 
         Class<?> parentClass = rel.getParentClass();
         Class<?> childClass = rel.getChildClass();
@@ -48,9 +49,10 @@ public class CreateChildCommand<R extends AggregateRoot, P extends Entity, C ext
          */
 
 
+        if (!this.getOrigin().isAllowedRelationship(parentClass, childClass, role))
 
-        if (!AggregateRoot.isAllowedRelationship(parentClass, childClass, role))
-            throw new AggregateRoot.InvalidRelationshipInstanceException(
+        //if (!AggregateRoot.isAllowedRelationship(parentClass, childClass, role))
+            throw new AggregateRootFactory.InvalidRelationshipInstanceException(
                     String.format(
                             "Invalid attempt to relate %s with %s using role %s%n",
                             parentClass.getName(), childClass.getName(), role));
@@ -61,6 +63,7 @@ public class CreateChildCommand<R extends AggregateRoot, P extends Entity, C ext
     @Override
     public ChildCreatedEvent<R, P, C, K> getEvent() {
         return new ChildCreatedEvent<>(
+                this.getOrigin(),
                 this,
                 this.parent,
                 this.role,

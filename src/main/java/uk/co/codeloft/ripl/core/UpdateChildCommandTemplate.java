@@ -13,16 +13,20 @@ public class UpdateChildCommandTemplate<R extends AggregateRoot, C extends Child
 
     private final String role;
 
+    private final AggregateRootFactory<R> factory;
+
     public UpdateChildCommandTemplate(
+            final AggregateRootFactory<R> factory,
             final String role,
             final BiPredicate<C, O> preCondition,
             final BiConsumer<C, O> applyFunc) {
+        this.factory = factory;
         this.role = role;
         this.preCondition = preCondition;
         this.applyFunc = applyFunc;
     }
 
     public UpdateChildCommand<R, C, O> using(R aggregateRoot, C targetChild, O param) {
-        return new UpdateChildCommand<>(aggregateRoot, this.role, targetChild, this.preCondition, this.applyFunc, param);
+        return new UpdateChildCommand<>(this.factory, aggregateRoot, this.role, targetChild, this.preCondition, this.applyFunc, param);
     }
 }

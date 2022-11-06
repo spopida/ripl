@@ -20,8 +20,8 @@ public class CreateCommand<T extends AggregateRoot, K> extends Command<T> {
     private final K kernel;
     private final BiFunction<CreatedEvent<T, K>, K, T> constructor;
 
-    public CreateCommand(Predicate<K> preConditionFunc, K kernel, BiFunction<CreatedEvent<T, K>, K, T> ctor) {
-        super();
+    public CreateCommand(AggregateRootFactory<T> origin, Predicate<K> preConditionFunc, K kernel, BiFunction<CreatedEvent<T, K>, K, T> ctor) {
+        super(origin);
         this.preConditionFunc = preConditionFunc;
         this.eventApplyFunc = target -> target;
         this.kernel = kernel;
@@ -35,6 +35,6 @@ public class CreateCommand<T extends AggregateRoot, K> extends Command<T> {
 
     @Override
     public CreatedEvent<T, K> getEvent() {
-        return new CreatedEvent<>(this, this.constructor);
+        return new CreatedEvent<>( this.getOrigin(), this, this.constructor);
     }
 }

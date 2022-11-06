@@ -15,15 +15,17 @@ public class HolidayHomeFactory extends AggregateRootFactory<HolidayHome> {
     // The template for creating a HolidayHome has no pre-conditions that apply to the kernel (k), and
     // requires the HolidayHome constructor
     private final CreateCommandTemplate<HolidayHome, HolidayHome.Kernel> createHolidayHome =
-            new CreateCommandTemplate<>(k -> true, HolidayHome::new);
+            new CreateCommandTemplate<>(this, k -> true, HolidayHome::new);
 
     // Make a command template to update the number of bedrooms with a pre-condition and an event action
     private final UpdateCommandTemplate<HolidayHome, Integer> setNumberOfBeds = new UpdateCommandTemplate<>(
+            this,
             (target, beds) -> beds <= 10,
             (home, beds) -> home.getKernel().setNumberOfBedrooms(beds));
 
     // A command template to set the owner (including a pre-condition and an action)
     public final UpdateCommandTemplate<HolidayHome, String> setOwner = new UpdateCommandTemplate<>(
+            this,
             (target, owner) -> !owner.isBlank(),
             (result, owner) -> result.getKernel().setOwnerName(owner));
 
@@ -35,17 +37,21 @@ public class HolidayHomeFactory extends AggregateRootFactory<HolidayHome> {
     // And the constructor for the template takes a predicate on the kernel, and a constructor
     public final CreateChildCommandTemplate<HolidayHome, HolidayHome, InspectionReport, InspectionReport.Kernel> createRpt =
             new CreateChildCommandTemplate<>(
+                    this,
                     k -> k.getReportDate().isBefore(LocalDate.now()),
                     InspectionReport::new);
 
     public final UpdateChildCommandTemplate<HolidayHome, InspectionReport, String> changeInspectorName =
-            new UpdateChildCommandTemplate<>( "is documented by",
+            new UpdateChildCommandTemplate<>(
+                    this,
+                    "is documented by",
                     (target, name) -> !name.isBlank(),
                     (report, name) -> report.getKernel().setInspectorName(name));
 
 
     public final CreateChildCommandTemplate<HolidayHome, InspectionReport, InspectionIssue, String> createIssue =
             new CreateChildCommandTemplate<>(
+                    this,
                     d -> true,
                     InspectionIssue::new);
 

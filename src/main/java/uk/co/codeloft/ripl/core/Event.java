@@ -26,7 +26,10 @@ public abstract class Event<T extends AggregateRoot> {
      */
     private Command<T> command;
 
-    protected Event(Command<T> command) {
+    private final AggregateRootFactory factory;
+
+    protected Event(AggregateRootFactory factory, Command<T> command) {
+        this.factory = factory;
         this.id = UUID.randomUUID().toString();
         this.command = command;
         this.timestamp = Instant.now();
