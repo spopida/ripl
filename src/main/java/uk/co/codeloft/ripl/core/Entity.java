@@ -1,8 +1,6 @@
 package uk.co.codeloft.ripl.core;
 
-import lombok.AccessLevel;
 import lombok.Getter;
-import lombok.Setter;
 
 import java.time.Instant;
 import java.util.*;
@@ -21,7 +19,7 @@ public abstract class Entity {
     private String id;
 
     /**
-     * The version number of this instance
+     * The version number of an instance
      */
     private int version;
 
@@ -35,16 +33,25 @@ public abstract class Entity {
      */
     private Instant updatedAt;
 
+    /**
+     * The {@link AggregateRootFactory} that was used to create this entity, and that governs any changes to it.
+     */
     private final AggregateRootFactory<?> factory;
 
     /**
-     * The collections of children, kept in a Map keyed by the locally-unique role that
+     * The collections of children, kept in a Map keyed by the factory-specific role that
      * describes the parent-child relationship (for example, a Person entity might have "achieved"
-     * multiple qualifications; here the role is "achieved").  If there were two sets of qualifications (say,
-     * "secondary", and "higher level", then these collections would have different roles.
+     * multiple qualifications; here the role is "achieved").
+     *
+     * In this context, factory-specific, means specific to the {@link AggregateRootFactory} that governs this entity.
      */
     private Map<String, ChildCollection<ChildEntity>> childCollections = new HashMap<>();
 
+    /**
+     * Construct an instance under the control of a given {@link AggregateRootFactory}
+     * @param factory the {@link AggregateRootFactory that governs changes to this instance}
+     * @param id the globally-unique identity of this entity
+     */
     protected Entity(AggregateRootFactory<?> factory, String id) {
         this.factory = factory;
         this.id = id;
@@ -62,7 +69,10 @@ public abstract class Entity {
     }
 
 
-
+    /**
+     * Record a mutation in this, and all parent instances.  A mutation results in the version number of each affected
+     * instance being incremented, and the last-update time being recorded.
+     */
     protected void mutate() {
         // recurse up the parents until we find one that cannot be assigned to ChildEntity - that must be the root
         if (ChildEntity.class.isAssignableFrom(this.getClass())) {
@@ -72,11 +82,19 @@ public abstract class Entity {
         this.evolve();
     }
 
+    /**
+     * Increment the version number and reset the updatedAt instant
+     */
     private void evolve() {
         this.version += 1;
         this.updatedAt = Instant.now();
     }
 
+    /**
+     * Get a {@link List} of child entities relating to a given role
+     * @param role the role played by the parent entity in the relationships with children
+     * @return a {@link List} of {@link ChildEntity} instances.  The list may be empty
+     */
     public List<ChildEntity> getChildren(String role) {
 
         // TODO: throw exception if no map entry for role
@@ -85,6 +103,11 @@ public abstract class Entity {
         return children.asList();
     }
 
+    /**
+     * Add a {@link ChildEntity} instance to this instance, associated with the given parent role
+     * @param role the role of this (parent) instance with which to associate the child
+     * @param child the {@link ChildEntity} to associate
+     */
     public void addChild(String role, ChildEntity child) {
         Class<?> parentClass = this.getClass();
         Class<?> childClass = child.getClass();
@@ -103,6 +126,11 @@ public abstract class Entity {
         this.mutate();
     }
 
+    /**
+     * Get the {@link AggregateRoot} instance of this entity
+     * @return  the {@link AggregateRoot} entity at the root of the hierarchy of entities that this instance belongs to.
+     *          If this instance <i>is</i> the aggregate root, then it will be returned.
+     */
     public AggregateRoot getRoot() {
         // recurse up the parents until we find one that cannot be assigned to ChildEntity - that must be the root
         if (ChildEntity.class.isAssignableFrom(this.getClass())) {
@@ -111,6 +139,14 @@ public abstract class Entity {
             return (AggregateRoot)this;
     }
 
+    /**
+     * Get all the entities that are children if this instance and are associated with a specific role, and that match a
+     * predicate function.
+     * @param role the role assocated with the parent-child relationships
+     * @param p the predicate function used for matching
+     * @return all matching children in the form of {@link ChildEntity} sub-class instances contained in a {@link List}
+     * @param <T> the sub-type of the {@link ChildEntity} instances
+     */
     @SuppressWarnings("unchecked") // TODO: See body
     public <T extends ChildEntity> List<T> findChildren(String role, Predicate<T> p) {
         List<T> result = new ArrayList<>();
@@ -143,6 +179,10 @@ public abstract class Entity {
         return result;
     }
 
+    /**
+     * Get a {@link String} representation of this instance
+     * @return this instance as a {@link String}.
+     */
     public String toString() {
         return
                 String.format("Type: %s%n", this.getClass().getSimpleName()) +
@@ -153,6 +193,10 @@ public abstract class Entity {
 
     }
 
+    /**
+     * Get a {@link String} representation of all children of this instance.  This is intended for diagnostic usage.
+     * @return a {@link String} representation of all children of this instance.
+     */
     public String allChildren() {
         StringBuilder sb = new StringBuilder();
 
