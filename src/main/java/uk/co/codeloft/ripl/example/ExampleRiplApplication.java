@@ -28,7 +28,7 @@ public class ExampleRiplApplication {
         // Declare parent-child relationships - allow inspection reports as children of the aggregate root,
         // and allow inspection issues as children of inspection reports.
 
-        factory.allowRelationship(HolidayHome.class, InspectionReport.class, "is documented by");
+        factory.allowRelationship(HolidayHome.class, InspectionReport.class, "inspection subject");
         factory.allowRelationship(HolidayHome.class, Booking.class, "is booked by");
         factory.allowRelationship(InspectionReport.class, InspectionIssue.class, "contains");
 
@@ -48,7 +48,7 @@ public class ExampleRiplApplication {
             print(rosebudCottage);
 
             // Let's see if we can get it from the repo
-            rosebudCottage = repo.getLatest(rosebudCottage.getId());
+            rosebudCottage = repo.getLatest(rosebudCottage.getId()).orElseThrow(() -> new Exception("Can't find it!"));
             print(rosebudCottage);
 
             rosebudCottage = factory.setNumberOfBeds(rosebudCottage.getId(), 6);
@@ -71,16 +71,16 @@ public class ExampleRiplApplication {
                     .build();
 
 
-            rosebudCottage = factory.createInspectionReport(rosebudCottage.getId(), firstReport, "is documented by");
+            rosebudCottage = factory.createInspectionReport(rosebudCottage.getId(), firstReport, "inspection subject");
             print(rosebudCottage);
 
-            rosebudCottage = factory.createInspectionReport(rosebudCottage.getId(), secondReport, "is documented by");
+            rosebudCottage = factory.createInspectionReport(rosebudCottage.getId(), secondReport, "inspection subject");
             print(rosebudCottage);
 
 
             // Now let's get the report we just added
             Predicate<InspectionReport> findPredicate = rpt -> rpt.getKernel().getInspectorName().equals("Ivor Beadyeye");
-            List<InspectionReport> matchingReports = rosebudCottage.findChildren("is documented by", findPredicate);
+            List<InspectionReport> matchingReports = rosebudCottage.findChildren("inspection subject", findPredicate);
 
             for (InspectionReport rpt : matchingReports) {
                 rosebudCottage = factory.changeInspectorName(rosebudCottage.getId(), rpt.getId(), "Ivor Massive Beadyeye");

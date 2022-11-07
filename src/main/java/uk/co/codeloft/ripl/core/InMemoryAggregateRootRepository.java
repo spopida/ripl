@@ -2,6 +2,7 @@ package uk.co.codeloft.ripl.core;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 public class InMemoryAggregateRootRepository<T extends AggregateRoot> implements AggregateRootRepository<T> {
 
@@ -31,7 +32,7 @@ public class InMemoryAggregateRootRepository<T extends AggregateRoot> implements
     }
 
     @Override
-    public T getLatest(String id) {
+    public Optional<T> getLatest(String id) {
         String snapshotId = this.latestSnapshotsKeyedByAggregateRootId.get(id);
 
         if (this.snapshots.containsKey(snapshotId)) {
@@ -39,9 +40,9 @@ public class InMemoryAggregateRootRepository<T extends AggregateRoot> implements
 
             // TODO: INFLATE THE SNAPSHOT TO THE LATEST VERSION
             // - get all events since the version of the snapshot in the right order and apply them
-            return root;
+            return Optional.of(root);
         } else {
-            return null;
+            return Optional.empty();
         }
     }
 

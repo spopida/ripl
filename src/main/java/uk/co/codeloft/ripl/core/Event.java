@@ -26,8 +26,16 @@ public abstract class Event<T extends AggregateRoot> {
      */
     private Command<T> command;
 
+    /**
+     * The factory that performed this event
+     */
     private final AggregateRootFactory factory;
 
+    /**
+     * Create an instance
+     * @param factory the factory that performed the event represented by an instance
+     * @param command the command that gave rise to the event
+     */
     protected Event(AggregateRootFactory factory, Command<T> command) {
         this.factory = factory;
         this.id = UUID.randomUUID().toString();
@@ -35,6 +43,11 @@ public abstract class Event<T extends AggregateRoot> {
         this.timestamp = Instant.now();
     }
 
+    /**
+     * Apply the event to an aggregate root entity.
+     * @param rootEntity the aggregate root entity that will be subjected to the event
+     * @return a new version of the aggregate root entity, after having had the event applied
+     */
     public abstract T apply(T rootEntity);
 
 }

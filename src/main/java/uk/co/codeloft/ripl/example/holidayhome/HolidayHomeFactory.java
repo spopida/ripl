@@ -44,7 +44,7 @@ public class HolidayHomeFactory extends AggregateRootFactory<HolidayHome> {
     public final UpdateChildCommandTemplate<HolidayHome, InspectionReport, String> changeInspectorName =
             new UpdateChildCommandTemplate<>(
                     this,
-                    "is documented by",
+                    "inspection subject",
                     (target, name) -> !name.isBlank(),
                     (report, name) -> report.getKernel().setInspectorName(name));
 
