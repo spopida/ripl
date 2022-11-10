@@ -20,11 +20,7 @@ public class ChildUpdatedEvent<R extends AggregateRoot, C extends ChildEntity, O
     }
 
     @Override
-    public R apply(R rootEntity) {
-
-        //this.aggregateRoot.mutate();
-        // Get the target root
-        //R newVersion = this.updateAggregateRoot(); // TODO: change how this is done?
+    public R apply() {
 
         // Maybe: Check that the child exists in the target root??
         // - here we need to get a reference to the SAME child from the new copy

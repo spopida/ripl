@@ -37,15 +37,10 @@ public class CreatedEvent<T extends AggregateRoot, K> extends Event<T> {
 
     /**
      * Apply this event, creating an instance of the sub-type of {@link AggregateRoot}
-     * @param target must always be null for creation events
      * @return a new instance of the sub-type of {@link AggregateRoot}
      */
     @Override
-    public T apply(T target) {
-        // TODO: Code smell - this method is overriding an abstraction that always expects a parameter, but this
-        //       implementation MUST have a null value (because we are creating something)
-
-        if (target != null) throw new IllegalArgumentException("Null target expected when creating a new entity");
+    public T apply() {
         return constructor.apply(this, this.kernel);
     }
 

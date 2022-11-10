@@ -29,7 +29,7 @@ public class ChildCreatedEvent<R extends AggregateRoot, P extends Entity, C exte
     }
 
     @Override
-    public R apply(R target) {
+    public R apply() {
         // Get the root of the parent (type = R)
         R root = (R) this.parent.getRoot();
 

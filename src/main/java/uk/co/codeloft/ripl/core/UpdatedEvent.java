@@ -28,7 +28,7 @@ public class UpdatedEvent<T extends AggregateRoot, O extends Object> extends Eve
      */
 
     @Override
-    public T apply(T target) {
+    public T apply() {
         //T newVersion = this.updateAggregateRoot(); // TODO: change how this is done?
         aggregateRoot.mutate();
 

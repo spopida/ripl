@@ -45,9 +45,8 @@ public abstract class Event<T extends AggregateRoot> {
 
     /**
      * Apply the event to an aggregate root entity.
-     * @param rootEntity the aggregate root entity that will be subjected to the event
      * @return a new version of the aggregate root entity, after having had the event applied
      */
-    public abstract T apply(T rootEntity);
+    public abstract T apply();
 
 }

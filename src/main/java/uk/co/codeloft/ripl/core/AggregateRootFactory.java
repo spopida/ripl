@@ -127,7 +127,7 @@ public class AggregateRootFactory<T extends AggregateRoot> {
 
 
         // store the snapshot
-        T snapshot = command.getEvent().apply(null);
+        T snapshot = command.getEvent().apply();
         this.repository.storeSnapshot(snapshot);
 
         return snapshot;
