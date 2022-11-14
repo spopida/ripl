@@ -29,19 +29,26 @@ public class AggregateRoot extends Entity {
      */
     private final Map<String, Entity> allDescendents;
 
-    /**
-     * Create an instance attributable to a given {@link CreatedEvent}
-     * @param evt the event that caused instantiation
-     */
 
     /**
      * The number of versions that should be allowed between physically stored snapshots
      */
     private int snapshotInterval;
 
+    /**
+     * The version of the last snapshot relating to this version.  If this equates
+     * to the version number of this version then this version is a 'snapshot' version
+     */
+    private int lsVersion;
+
+    /**
+     * Create an instance attributable to a given {@link CreatedEvent}
+     * @param evt the event that caused instantiation
+     */
     public AggregateRoot(CreatedEvent<?, ?> evt, int snapshotInterval) {
         super(evt.getFactory(), UUID.randomUUID().toString());
         this.snapshotId = UUID.randomUUID().toString();
+        this.lsVersion = this.getVersion();
         this.createdEvent = evt;
         this.allDescendents = new HashMap<>();
         this.snapshotInterval = snapshotInterval;
@@ -88,6 +95,15 @@ public class AggregateRoot extends Entity {
      */
     private String asString() {
         return
-                String.format("From Snapshot: %s%n", this.getSnapshotId());
+                String.format("From Snapshot: %s%n", this.getSnapshotId()) +
+                String.format("Snapshot Interval: %d%n", this.getSnapshotInterval()) +
+                String.format("Last Snapshot Version: %d%n", this.getLsVersion());
+    }
+
+    /**
+     * Reset the lsVersion attribute so that this instance becomes a snapshot
+     */
+    protected void resetLsVersion() {
+        this.lsVersion = this.getVersion();
     }
 }

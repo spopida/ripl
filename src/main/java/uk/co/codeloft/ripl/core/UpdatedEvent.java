@@ -14,18 +14,18 @@ public class UpdatedEvent<T extends AggregateRoot, O extends Object> extends Eve
 
     @Override
     public T apply() {
-        //T newVersion = this.updateAggregateRoot(); // TODO: change how this is done?
         aggregateRoot.mutate();
 
         UpdateCommand<T, O> cmd = (UpdateCommand<T, O>) this.getCommand();
         cmd.getApplyFunc().accept(aggregateRoot, cmd.getParam());
-        return cmd.getTarget();
+        //return cmd.getTarget();
+        return aggregateRoot;
     }
 
     @Override
     public boolean requiresSnapshot() {
         return
-                this.aggregateRoot.getSnapshotInterval() != 0 &&
+                this.aggregateRoot.getSnapshotInterval() == 0 ||
                 this.aggregateRoot.getVersion() % this.aggregateRoot.getSnapshotInterval() == 0;
     }
 }

@@ -39,7 +39,18 @@ public class InMemoryAggregateRootRepository<T extends AggregateRoot> implements
             T root = this.snapshots.get(snapshotId);
 
             // TODO: INFLATE THE SNAPSHOT TO THE LATEST VERSION
-            // - get all events since the version of the snapshot in the right order and apply them
+
+            // We have a little problem.  Commands and Events have been coded such that they have a reference to the
+            // AR that they relate to.  This is not nice ... it means that whenever we retrieve either commands or
+            // events, we need to retrieve or de-serialze the AR targeted or emerging.  This kind of defeats the point.
+            // I think we should store the ID of the AR, but not a reference to it.  The implications of this need to be elaborated.
+            //
+            // - What happens when we 'perform' a command ?
+            //  - we get an inflated version of the AR, and check the pre-conditions
+            // - What happens when we apply an event
+            //  - we apply it to an AR - we need to pass the AR to apply!
+
+            //this.getEventsAfterVersion(root.getVersion()).map(e -> e.apply())
             return Optional.of(root);
         } else {
             return Optional.empty();
@@ -58,6 +69,7 @@ public class InMemoryAggregateRootRepository<T extends AggregateRoot> implements
 
     @Override
     public void storeSnapshot(T snapshot) {
+        snapshot.resetLsVersion();
         this.snapshots.put(snapshot.getSnapshotId(), snapshot);
         this.latestSnapshotsKeyedByAggregateRootId.put(snapshot.getId(), snapshot.getSnapshotId());
     }

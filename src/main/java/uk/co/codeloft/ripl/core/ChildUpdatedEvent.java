@@ -39,7 +39,7 @@ public class ChildUpdatedEvent<R extends AggregateRoot, C extends ChildEntity, O
     @Override
     public boolean requiresSnapshot() {
         return
-                this.aggregateRoot.getSnapshotInterval() != 0 &&
+                this.aggregateRoot.getSnapshotInterval() == 0 ||
                 this.aggregateRoot.getVersion() % this.aggregateRoot.getSnapshotInterval() == 0;
     }
 }

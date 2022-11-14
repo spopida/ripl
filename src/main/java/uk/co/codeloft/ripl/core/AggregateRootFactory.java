@@ -139,7 +139,9 @@ public class AggregateRootFactory<T extends AggregateRoot> {
         T snapshot = event.apply();
 
         // store a new snapshot, but only if necessary
-        if (event.requiresSnapshot()) this.repository.storeSnapshot(snapshot);
+        if (event.requiresSnapshot()) {
+            this.repository.storeSnapshot(snapshot);
+        }
 
         return snapshot;
     }
