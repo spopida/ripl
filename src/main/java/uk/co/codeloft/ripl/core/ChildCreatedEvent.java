@@ -43,4 +43,13 @@ public class ChildCreatedEvent<R extends AggregateRoot, P extends Entity, C exte
         return root;
     }
 
+    @Override
+    public boolean requiresSnapshot() {
+        R root = (R) this.parent.getRoot();
+
+        return
+                root.getSnapshotInterval() != 0 &&
+                root.getVersion() % root.getSnapshotInterval() == 0;
+    }
+
 }

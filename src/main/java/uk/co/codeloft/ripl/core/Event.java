@@ -49,4 +49,10 @@ public abstract class Event<T extends AggregateRoot> {
      */
     public abstract T apply();
 
+    /**
+     * Indicates whether this event should trigger storage of a snapshot
+     * @return {@<code>true</code>} or {@<code>false</code>}
+     */
+    public abstract boolean requiresSnapshot();
+
 }

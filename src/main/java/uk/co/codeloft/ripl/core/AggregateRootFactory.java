@@ -116,19 +116,30 @@ public class AggregateRootFactory<T extends AggregateRoot> {
         // evaluate pre-conditions (might throw up)
         command.checkPreConditions();
 
-        // store the event
-        this.repository.storeEvent(command.getEvent());
-
-        // TODO: attention needed here - don't always store snapshot!
-        //       Instead, we should be retrieving the latest version, then applying this event to it, perhaps
-        //       Storing a new snapshot ... perhaps not
+        // TODO: Figure out how to store a 'snapshot' identifier in the event so that we can retrieve all events
+        //       that succeed a given snapshot.  I think we should be able to store the aggregate root version of
+        //       the last snapshot.
         //
-        //       But how do we identify the entity?!
+        //       Basically, an AR has TWO versions.  The version of the AR, and the version of the last snapshot.
+        //       When we create an AR, the two are the same.  When we mutate it, we only update the version, not the
+        //       lsVersion.  When we store a new snapshot, we set them to be the same again.
+        //
+        //       When we create an Event, we set the lsVersion of the event to be the lsVersion of the AR that it is
+        //       applying to
+        //
+        //       Thus when we retrieve the latest version of the AR, we get the most recent snapshot, then we get
+        //       all events that are tied to this, in chronological order, then we apply them, then we return
+        //       the latest snapshot.
 
+        // store the event
+        Event<T> event = command.getEvent();
+        this.repository.storeEvent(event);
 
-        // store the snapshot
-        T snapshot = command.getEvent().apply();
-        this.repository.storeSnapshot(snapshot);
+        // apply the event, getting the updated entity
+        T snapshot = event.apply();
+
+        // store a new snapshot, but only if necessary
+        if (event.requiresSnapshot()) this.repository.storeSnapshot(snapshot);
 
         return snapshot;
     }

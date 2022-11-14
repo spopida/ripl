@@ -44,4 +44,10 @@ public class CreatedEvent<T extends AggregateRoot, K> extends Event<T> {
         return constructor.apply(this, this.kernel);
     }
 
+    @Override
+    public boolean requiresSnapshot() {
+        return true;
+    }
+
+
 }

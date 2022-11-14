@@ -33,11 +33,18 @@ public class AggregateRoot extends Entity {
      * Create an instance attributable to a given {@link CreatedEvent}
      * @param evt the event that caused instantiation
      */
-    public AggregateRoot(CreatedEvent<?, ?> evt) {
+
+    /**
+     * The number of versions that should be allowed between physically stored snapshots
+     */
+    private int snapshotInterval;
+
+    public AggregateRoot(CreatedEvent<?, ?> evt, int snapshotInterval) {
         super(evt.getFactory(), UUID.randomUUID().toString());
         this.snapshotId = UUID.randomUUID().toString();
         this.createdEvent = evt;
         this.allDescendents = new HashMap<>();
+        this.snapshotInterval = snapshotInterval;
 
         // Special case - we put this AggregateRoot instance in its map of descendents
         this.allDescendents.put(this.getId(), this);

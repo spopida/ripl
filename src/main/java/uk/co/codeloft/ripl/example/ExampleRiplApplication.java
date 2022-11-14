@@ -92,7 +92,8 @@ public class ExampleRiplApplication {
             rosebudCottage = factory.setNumberOfBeds(rosebudCottage.getId(), 11);
             print(rosebudCottage);
         } catch (Exception e) {
-            System.out.printf(e.getMessage());
+            System.out.println(e.getMessage());
+            e.printStackTrace();
             System.exit(1);
         }
 

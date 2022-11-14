@@ -70,7 +70,11 @@ public class HolidayHome extends AggregateRoot {
      * @param kernel the kernel of the aggregate root entity (core attributes)
      */
     public HolidayHome(CreatedEvent<HolidayHome, HolidayHome.Kernel> evt, Kernel kernel) {
-        super(evt);
+        this(evt, kernel, 0);
+    }
+
+    public HolidayHome(CreatedEvent<HolidayHome, HolidayHome.Kernel> evt, Kernel kernel, int snapshotInterval) {
+        super(evt, snapshotInterval);
         this.kernel = kernel;
     }
 

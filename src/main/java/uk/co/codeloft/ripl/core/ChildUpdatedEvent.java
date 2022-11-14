@@ -36,19 +36,10 @@ public class ChildUpdatedEvent<R extends AggregateRoot, C extends ChildEntity, O
         return this.aggregateRoot;
     }
 
-
-    // TODO: Change this - inflate from repo?
-    /*
-    protected R updateAggregateRoot() {
-        // TODO: Take a deep copy of the object
-        R deepCopy = (R)this.aggregateRoot; // TODO: here!
-
-        //** Perhaps we should re-inflate a copy from the last snapshot?
-
-        deepCopy.setVersion(deepCopy.getVersion() + 1);
-        // TODO: set lastUpdate on the aggregate
-        return deepCopy;
+    @Override
+    public boolean requiresSnapshot() {
+        return
+                this.aggregateRoot.getSnapshotInterval() != 0 &&
+                this.aggregateRoot.getVersion() % this.aggregateRoot.getSnapshotInterval() == 0;
     }
-
-     */
 }
