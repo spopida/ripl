@@ -46,9 +46,12 @@ public class InMemoryAggregateRootRepository<T extends AggregateRoot> implements
             // I think we should store the ID of the AR, but not a reference to it.  The implications of this need to be elaborated.
             //
             // - What happens when we 'perform' a command ?
-            //  - we get an inflated version of the AR, and check the pre-conditions
+            //  - we need to retrieve and inflate the AR, and check the pre-conditions
             // - What happens when we apply an event
             //  - we apply it to an AR - we need to pass the AR to apply!
+
+            // This seems to be a case of calling a reduce() function ... in each iteration we want to pass the result
+            // of applying the previous event until there are no more events left to apply
 
             //this.getEventsAfterVersion(root.getVersion()).map(e -> e.apply())
             return Optional.of(root);

@@ -113,6 +113,8 @@ public class AggregateRootFactory<T extends AggregateRoot> {
         // store the command
         this.repository.storeCommand(command);
 
+        // TODO: We might have to retrieve the latest version from the repo here
+
         // evaluate pre-conditions (might throw up)
         command.checkPreConditions();
 

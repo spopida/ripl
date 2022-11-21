@@ -5,8 +5,6 @@ import uk.co.codeloft.ripl.example.holidayhome.*;
 
 import java.time.LocalDate;
 import java.util.List;
-import java.util.function.BiConsumer;
-import java.util.function.BiPredicate;
 import java.util.function.Predicate;
 import java.util.logging.ConsoleHandler;
 import java.util.logging.Logger;
